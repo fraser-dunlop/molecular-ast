@@ -66,8 +66,24 @@ default-extensions:
 library:
   source-dirs: src
 
+executables:
+  molecular-ast-test-exe:
+    main: Spec.hs
+    source-dirs: test
+    ghc-options:
+    - -Wall
+    - -Wcompat
+    - -Wredundant-constraints
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - molecular-ast
+    - hypertypes
+    - text
+
 tests:
-  hypertypes-test:
+  molecular-ast-test:
     main: Spec.hs
     source-dirs: test
     ghc-options:

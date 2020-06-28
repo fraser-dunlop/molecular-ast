@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 5429370f89c90c56fe611a16b19ecab8df107c5fdaed34d91c3f82a1c667c6d7
+-- hash: 6b4b5e049bc1434737b69d7cc6e5a1194ba78d12a08ed8cb8cfe74fa7b3b280f
 
 name:           molecular-ast
 version:        0.1.0.0
@@ -98,7 +98,43 @@ library
     , type-sets
   default-language: Haskell2010
 
-test-suite hypertypes-test
+executable molecular-ast-test-exe
+  main-is: Spec.hs
+  other-modules:
+      Paths_molecular_ast
+  hs-source-dirs:
+      test
+  default-extensions: ConstraintKinds DataKinds DefaultSignatures DeriveGeneric DerivingStrategies GADTs GeneralizedNewtypeDeriving LambdaCase MultiParamTypeClasses RankNTypes ScopedTypeVariables StandaloneDeriving TupleSections TypeApplications TypeOperators TypeFamilies
+  ghc-options: -Wall -Wcompat -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      async
+    , base >=4.7 && <5
+    , base-compat
+    , binary
+    , cmptype
+    , constraints
+    , containers
+    , deepseq
+    , deriving-compat
+    , generic-constraints
+    , generic-data
+    , hypertypes
+    , lattices
+    , lens
+    , megaparsec
+    , molecular-ast
+    , monad-st
+    , mtl
+    , pretty
+    , random-extras
+    , random-fu
+    , random-source
+    , template-haskell
+    , text
+    , type-sets
+  default-language: Haskell2010
+
+test-suite molecular-ast-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:

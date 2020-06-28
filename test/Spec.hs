@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleContexts, BlockArguments, OverloadedStrings #-}
-{-# OPTIONS_GHC -fplugin=Type.Compare.Plugin -fconstraint-solver-iterations=0 -freduction-depth=0 #-}
+{-# OPTIONS_GHC -fplugin=Type.Compare.Plugin -fconstraint-solver-iterations=1000 -freduction-depth=0 #-}
 
 import qualified Control.Lens as Lens
 import           Control.Lens.Operators
@@ -52,6 +52,7 @@ import Atoms.Molecule.RTraversableInferOf
 import Atoms.Molecule.Types
 
 import Atoms.Reductions.EliminateImplies
+import Atoms.Transformations.DeMorgan
 
 
 import Text.Megaparsec
@@ -64,16 +65,12 @@ type SimpleMolecule = (Insert Implies
                       (Insert And 
                       (Insert Or
                       (Insert Not
-                      (Insert Type 
-                      (Insert Variable 
-                      (Insert Atoms.Elements.TypeBool.TypeBool ('Empty))))))))
+                      (Insert Variable ('Empty))))))
 
 type SimplerMolecule = (Insert And 
                        (Insert Or
                        (Insert Not
-                       (Insert Type 
-                       (Insert Variable 
-                       (Insert Atoms.Elements.TypeBool.TypeBool ('Empty)))))))
+                       (Insert Variable ('Empty)))))
 
 
 parseSomeMol :: Text -> Either (ParseErrorBundle Text Void) ((Molecule (VariantF SimpleMolecule)) # Pure) 
@@ -84,8 +81,8 @@ parseSomeMol = runParser (parser LeftRecursive) ""
 testSomeMol :: Either (ParseErrorBundle Text Void) ((Molecule (VariantF SimpleMolecule)) # Pure) 
 testSomeMol = runParser (parser LeftRecursive) "" "a -> b \\/ c" 
 
-shouldParseAs :: (Pure # (Molecule (VariantF SimpleMolecule))) 
-shouldParseAs = iVariable "a" `iImplies` (iVariable "b" `iOr` iVariable "c") 
+--shouldParseAs :: (Pure # (Molecule (VariantF SimpleMolecule))) 
+--shouldParseAs = iVariable "a" `iImplies` (iVariable "b" `iOr` iVariable "c") 
 
 
 --testSimpleMolecule :: Pure # (Molecule (VariantF SimpleMolecule)) 
@@ -95,13 +92,6 @@ shouldParseAs = iVariable "a" `iImplies` (iVariable "b" `iOr` iVariable "c")
 
 foldMolecule :: (ForAllIn Functor f) => ((VariantF f) a -> a) -> Pure # (Molecule (VariantF f)) -> a
 foldMolecule f (Pure (Molecule t)) = f (fmap (foldMolecule f) t)
-
--- | is this causing type checking to diverge?
---elimImp :: Pure # (Molecule (VariantF SimpleMolecule)) -> Pure # (Molecule (VariantF SimplerMolecule))
---elimImp = foldMolecule eliminateImples
-
---elimImpDecidable :: Pure # (Molecule (VariantF SimplerMolecule))
---elimImpDecidable = foldMolecule eliminateImples shouldParseAs
 
 genTest :: IO (Pure # (Molecule (VariantF SimpleMolecule)))
 genTest = genTimeLimited gen 1 
@@ -117,7 +107,14 @@ main = do
         case parseSomeMol $ pack $ Pretty.render $ pPrint gend of
              Left err -> error $ show err 
              Right p -> do
-                print $ pPrint p 
+                print $ pPrint p  
+                putStrLn "deMorganNegationOfDisjunction"
+                print $ pPrint $ foldMolecule deMorganNegationOfDisjunction (Pure p)
+                
+                -- | is this causing type checking to diverge?
+                putStrLn "eliminateImplies"
+                let el :: Pure # Molecule (VariantF SimplerMolecule) = foldMolecule eliminateImplies (Pure p)
+                print $ pPrint el 
                 putStrLn ""
 
 

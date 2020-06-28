@@ -17,12 +17,12 @@ class EliminateImplies f t where
                      -> Pure # Molecule (VariantF t)
 
 instance ( HasF Implies f
+         , HasF Or t
+         , HasF Not t
          , ForAllIn Functor t
          , Insert Implies t ~ f
          , Follow (Locate Implies f) f ~ Implies
          , FromSides (Locate Implies f)
-         , HasF Or t
-         , HasF Not t
          ) => EliminateImplies f t where
     eliminateImplies (VariantF (tag :: SSide ss) res) = 
         case (testEquality tag (fromSides @(Locate Implies f)), proveFollowInsert @ss @Implies @t) of
