@@ -21,8 +21,9 @@ Any chemistry set you design will play nicely with others and be open to extensi
 ## Build complex Molecular AST transformations from a library of components
 - Atoms.Molecule contains generic Molecular definitions
 - Atoms.Elements contains a library of Atomic syntactic elements
-- Atoms.Reductions contains rules that eliminate elements from a Molecule
-- Atoms.Transformations contains rules that transform but do not guarantee elimination 
+- Atoms.Chemistry.Reductions contains rules that eliminate elements from a Molecule
+- Atoms.Chemistry.Transformations contains rules that transform but do not guarantee elimination 
+- Atoms.Chemistry.Cascades contains rules composed from other rules
 
 # A detailed walkthrough
 - Molecular ASTs are HyperTypes indexed by type level sets of functors.
