@@ -1,0 +1,3 @@
+[submodule "hypertypes"]
+	path = hypertypes
+	url = https://github.com/lamdu/hypertypes.git
