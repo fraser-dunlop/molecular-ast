@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Atoms.Transformations.DeMorgan where
+module Atoms.Chemistry.Transformations.DeMorgan where
 import Atoms.Elements.And
 import Atoms.Elements.Not
 import Atoms.Elements.Or
@@ -51,5 +51,4 @@ instance ( HasF And t
                                   And a b -> (iNot a) `iOr` (iNot b)
                             Nothing -> Pure $ Molecule (VariantF tag res) 
             Nothing -> Pure $ Molecule (VariantF tag res)
-
 

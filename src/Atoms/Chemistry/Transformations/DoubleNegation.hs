@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Atoms.Transformations.DoubleNegation where
+module Atoms.Chemistry.Transformations.DoubleNegation where
 import Atoms.Elements.Not
 import Atoms.Molecule.AST
 import Data.Type.Equality

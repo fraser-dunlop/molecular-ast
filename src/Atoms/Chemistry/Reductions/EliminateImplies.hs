@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Atoms.Reductions.EliminateImplies where
+module Atoms.Chemistry.Reductions.EliminateImplies where
 import Atoms.Elements.Implies
 import Atoms.Elements.Not
 import Atoms.Elements.Or

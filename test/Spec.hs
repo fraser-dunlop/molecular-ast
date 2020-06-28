@@ -51,8 +51,11 @@ import Atoms.Molecule.RTraversable
 import Atoms.Molecule.RTraversableInferOf
 import Atoms.Molecule.Types
 
-import Atoms.Reductions.EliminateImplies
-import Atoms.Transformations.DeMorgan
+import Atoms.Chemistry.Cascades.DeMorgan
+
+import Atoms.Chemistry.Reductions.EliminateImplies
+import Atoms.Chemistry.Transformations.DeMorgan
+import Atoms.Chemistry.Transformations.DoubleNegation
 
 
 import Text.Megaparsec
@@ -90,16 +93,18 @@ testSomeMol = runParser (parser LeftRecursive) "" "a -> b \\/ c"
 
 --testSimpleMolecule expr  = execPureInfer (inferExpr expr)
 
-foldMolecule :: (ForAllIn Functor f) => ((VariantF f) a -> a) -> Pure # (Molecule (VariantF f)) -> a
-foldMolecule f (Pure (Molecule t)) = f (fmap (foldMolecule f) t)
 
 genTest :: IO (Pure # (Molecule (VariantF SimpleMolecule)))
-genTest = genTimeLimited gen 1 
+genTest = do
+   gend <- genTimeLimited gen 100 
+   if length (Pretty.render (pPrint gend)) < 20
+      then genTest
+      else return gend
 
 
 main :: IO ()
 main = do
-    void $ sequence $ replicate 100 $ do
+    void $ sequence $ replicate 10 $ do
         putStrLn "random generating"
         gend <- genTest     
         print $ pPrint gend
@@ -109,12 +114,24 @@ main = do
              Right p -> do
                 print $ pPrint p  
                 putStrLn "deMorganNegationOfDisjunction"
-                print $ pPrint $ foldMolecule deMorganNegationOfDisjunction (Pure p)
-                
-                -- | is this causing type checking to diverge?
+                let p1 :: Pure # Molecule (VariantF SimpleMolecule) = foldMolecule deMorganNegationOfDisjunction (Pure p)
+
+                print $ pPrint p1 
+               
+
+                putStrLn "deMorganCascade"
+                let p4 :: Pure # Molecule (VariantF SimpleMolecule) = deMorganCascade (Pure p)
+                print $ pPrint p4
+
+
                 putStrLn "eliminateImplies"
-                let el :: Pure # Molecule (VariantF SimplerMolecule) = foldMolecule eliminateImplies (Pure p)
-                print $ pPrint el 
+                let p2 :: Pure # Molecule (VariantF SimplerMolecule) = foldMolecule eliminateImplies (Pure p)
+                print $ pPrint p2
+
+                putStrLn "doubleNegation"
+                let p3 :: Pure # Molecule (VariantF SimpleMolecule) = foldMolecule doubleNegation (Pure p)
+                print $ pPrint p3
+
                 putStrLn ""
 
 

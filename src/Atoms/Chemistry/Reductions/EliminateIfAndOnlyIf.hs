@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Atoms.Reductions.EliminateIfAndOnlyIf where
+module Atoms.Chemistry.Reductions.EliminateIfAndOnlyIf where
 import Atoms.Elements.And
 import Atoms.Elements.IfAndOnlyIf
 import Atoms.Elements.Not
