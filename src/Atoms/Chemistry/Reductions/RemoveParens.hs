@@ -12,6 +12,7 @@ import Type.Set
 import Type.Set.Variant
 import Type.Set.VariantF
 
+-- TODO Reductions should have an STRef s Bool param to say whether they changed anything
 class RemoveParens f t where
     removeParens :: VariantF f (Pure # Molecule (VariantF t))
                  -> Pure # Molecule (VariantF t)

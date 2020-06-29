@@ -14,7 +14,19 @@ import Type.Set.VariantF
 import Data.STRef
 import Control.Monad.ST
 
-class DeMorgan t where
+class ( HasF And t
+      , HasF Not t
+      , HasF Or t
+      , ForAllIn Functor t
+      , ForAllIn Foldable t
+      , ForAllIn Traversable t
+      , Follow (Locate And t) t ~ And 
+      , FromSides (Locate And t)
+      , Follow (Locate Not t) t ~ Not 
+      , FromSides (Locate Not t)
+      , Follow (Locate Or t) t ~ Or 
+      , FromSides (Locate Or t)
+      ) => DeMorgan t where
     deMorganNegationOfDisjunction :: STRef s Bool
                                   -> VariantF t (Pure # Molecule (VariantF t))
                                   -> ST s (Pure # Molecule (VariantF t))
