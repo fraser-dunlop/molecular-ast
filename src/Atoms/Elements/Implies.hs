@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -29,7 +30,7 @@ import Type.Set.Variant
 import Type.Set.VariantF
 
 data Implies h = Implies h h  
-  deriving (Eq, Ord, Show, Generic)
+  deriving (Eq, Ord, Show, Generic, Foldable, Traversable)
 
 instance Functor Implies where
    fmap f (Implies l r) = Implies (f l) (f r) 

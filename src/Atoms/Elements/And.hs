@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -29,7 +30,7 @@ import Type.Set.Variant
 import Type.Set.VariantF
 
 data And h = And h h  
-  deriving (Eq, Ord, Show, Generic)
+  deriving (Eq, Ord, Show, Generic, Foldable, Traversable)
 
 instance Functor And where
    fmap f (And l r) = And (f l) (f r) 

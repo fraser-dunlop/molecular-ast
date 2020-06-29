@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -29,7 +30,7 @@ import Type.Set.Variant
 import Type.Set.VariantF
 
 data IfAndOnlyIf h = IfAndOnlyIf h h  
-  deriving (Eq, Ord, Show, Generic)
+  deriving (Eq, Ord, Show, Generic, Foldable, Traversable)
 
 instance Functor IfAndOnlyIf where
    fmap f (IfAndOnlyIf l r) = IfAndOnlyIf (f l) (f r) 

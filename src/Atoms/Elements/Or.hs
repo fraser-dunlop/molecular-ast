@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -28,7 +29,7 @@ import Type.Set.Variant
 import Type.Set.VariantF
 
 data Or h = Or h h  
-  deriving (Eq, Ord, Show, Generic)
+  deriving (Eq, Ord, Show, Generic, Foldable, Traversable)
 
 instance Functor Or where
    fmap f (Or l r) = Or (f l) (f r) 

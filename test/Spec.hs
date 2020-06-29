@@ -96,7 +96,7 @@ testSomeMol = runParser (parser LeftRecursive) "" "a -> b \\/ c"
 
 genTest :: IO (Pure # (Molecule (VariantF SimpleMolecule)))
 genTest = do
-   gend <- genTimeLimited gen 100 
+   gend <- genTimeLimited gen 1000 
    if length (Pretty.render (pPrint gend)) < 20
       then genTest
       else return gend
@@ -112,18 +112,18 @@ main = do
         case parseSomeMol $ pack $ Pretty.render $ pPrint gend of
              Left err -> error $ show err 
              Right p -> do
-                print $ pPrint p  
-                putStrLn "deMorganNegationOfDisjunction"
-                let p1 :: Pure # Molecule (VariantF SimpleMolecule) = foldMolecule deMorganNegationOfDisjunction (Pure p)
-
-                print $ pPrint p1 
+ 
+                putStrLn "deMorganNegationOfConjunctionFixed"
+                let p1 = deMorganNegationOfConjunctionFixed (Pure p)
+                print $ fst p1
+                print $ pPrint $ snd p1 
+                putStrLn "deMorganNegationOfDisjunctionFixed"
+                let p1 = deMorganNegationOfDisjunctionFixed (Pure p)
+                print $ fst p1
+                print $ pPrint $ snd p1 
                
 
-                putStrLn "deMorganCascade"
-                let p4 :: Pure # Molecule (VariantF SimpleMolecule) = deMorganCascade (Pure p)
-                print $ pPrint p4
-
-
+              
                 putStrLn "eliminateImplies"
                 let p2 :: Pure # Molecule (VariantF SimplerMolecule) = foldMolecule eliminateImplies (Pure p)
                 print $ pPrint p2

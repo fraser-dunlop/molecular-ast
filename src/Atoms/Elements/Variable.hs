@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE FlexibleInstances #-}
 module Atoms.Elements.Variable where
@@ -27,7 +28,7 @@ import Type.Set.VariantF
 
 data Variable h = Variable String 
    deriving stock Show
-   deriving (Eq, Ord, Generic, Generic1) 
+   deriving (Eq, Ord, Generic, Generic1, Foldable, Traversable) 
 
 instance Functor Variable where
    fmap f (Variable i) = Variable i 

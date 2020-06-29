@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3fb7d1f462a57c445978a5e95035c59e5fa4b62a8f1a91bb78eb631b9f1d0244
+-- hash: 154a693851ee801986438f2bf5a290b9bfc45bdfc21880399d9c16ffe5f28b62
 
 name:           molecular-ast
 version:        0.1.0.0
@@ -32,6 +32,7 @@ library
       Atoms.Chemistry.Reductions.EliminateImplies
       Atoms.Chemistry.Transformations.DeMorgan
       Atoms.Chemistry.Transformations.DoubleNegation
+      Atoms.Chemistry.Utils.FixedPoint
       Atoms.Elements.And
       Atoms.Elements.GenericProduct
       Atoms.Elements.IfAndOnlyIf

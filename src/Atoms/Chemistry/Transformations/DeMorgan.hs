@@ -11,17 +11,23 @@ import Hyper
 import Type.Set
 import Type.Set.Variant
 import Type.Set.VariantF
+import Data.STRef
+import Control.Monad.ST
 
 class DeMorgan t where
-    deMorganNegationOfDisjunction :: VariantF t (Pure # Molecule (VariantF t))
-                                  -> Pure # Molecule (VariantF t)
-    deMorganNegationOfConjunction :: VariantF t (Pure # Molecule (VariantF t))
-                                  -> Pure # Molecule (VariantF t)
+    deMorganNegationOfDisjunction :: STRef s Bool
+                                  -> VariantF t (Pure # Molecule (VariantF t))
+                                  -> ST s (Pure # Molecule (VariantF t))
+    deMorganNegationOfConjunction :: STRef s Bool
+                                  -> VariantF t (Pure # Molecule (VariantF t))
+                                  -> ST s (Pure # Molecule (VariantF t))
 
 instance ( HasF And t
          , HasF Not t
          , HasF Or t
          , ForAllIn Functor t
+         , ForAllIn Foldable t
+         , ForAllIn Traversable t
          , Follow (Locate And t) t ~ And 
          , FromSides (Locate And t)
          , Follow (Locate Not t) t ~ Not 
@@ -29,7 +35,7 @@ instance ( HasF And t
          , Follow (Locate Or t) t ~ Or 
          , FromSides (Locate Or t)
          ) => DeMorgan t where
-    deMorganNegationOfDisjunction (VariantF (tag :: SSide ss) res) =
+    deMorganNegationOfDisjunction changed node@(VariantF (tag :: SSide ss) res) =
         case testEquality tag (fromSides @(Locate Not t)) of
             Just Refl ->
                 case res of
@@ -37,10 +43,12 @@ instance ( HasF And t
                         case testEquality tagi (fromSides @(Locate Or t)) of
                             Just Refl ->
                                case resi of
-                                  Or a b -> (iNot a) `iAnd` (iNot b)
-                            Nothing -> Pure $ Molecule (VariantF tag res) 
-            Nothing -> Pure $ Molecule (VariantF tag res)
-    deMorganNegationOfConjunction (VariantF (tag :: SSide ss) res) =
+                                  Or a b -> do
+                                     writeSTRef changed True
+                                     pure $ (iNot a) `iAnd` (iNot b)
+                            Nothing -> pureVNode node 
+            Nothing -> pureVNode node
+    deMorganNegationOfConjunction changed node@(VariantF (tag :: SSide ss) res) =
         case testEquality tag (fromSides @(Locate Not t)) of
             Just Refl ->
                 case res of
@@ -48,7 +56,8 @@ instance ( HasF And t
                         case testEquality tagi (fromSides @(Locate And t)) of
                             Just Refl ->
                                case resi of
-                                  And a b -> (iNot a) `iOr` (iNot b)
-                            Nothing -> Pure $ Molecule (VariantF tag res) 
-            Nothing -> Pure $ Molecule (VariantF tag res)
-
+                                  And a b -> do
+                                      writeSTRef changed True
+                                      pure $ (iNot a) `iOr` (iNot b)
+                            Nothing -> pureVNode node 
+            Nothing -> pureVNode node 

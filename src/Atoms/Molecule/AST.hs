@@ -16,3 +16,21 @@ makeHTraversableAndBases ''Molecule
 
 foldMolecule :: (ForAllIn Functor f) => ((VariantF f) a -> a) -> Pure # (Molecule (VariantF f)) -> a
 foldMolecule f (Pure (Molecule t)) = f (fmap (foldMolecule f) t)
+
+
+pureVNode :: ( Applicative m
+             , ForAllIn Functor g
+             ) => VariantF g (Pure # Molecule (VariantF g))
+               -> m (Pure # Molecule (VariantF g)) 
+pureVNode = pure . Pure . Molecule
+
+foldMoleculeM :: forall g m a . 
+               ( ForAllIn Functor g
+               , Monad m
+               , ForAllIn Foldable g
+               , ForAllIn Traversable g
+               ) => ((VariantF g) a -> m a)
+                 -> Pure # (Molecule (VariantF g))
+                 -> m a
+foldMoleculeM f (Pure (Molecule t)) =
+    traverse (foldMoleculeM f) t >>= f
