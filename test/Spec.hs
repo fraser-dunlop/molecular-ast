@@ -34,6 +34,7 @@ import Atoms.Elements.Or
 import Atoms.Elements.Not
 import Atoms.Elements.Variable
 import Atoms.Elements.Implies
+import Atoms.Elements.Parens
 import Atoms.Molecule.AST
 import Atoms.Molecule.TypeError
 import Atoms.Molecule.Parser
@@ -53,6 +54,8 @@ import Atoms.Molecule.Types
 
 import Atoms.Chemistry.Cascades.DeMorgan
 
+import Atoms.Chemistry.Reductions.RemoveParens
+
 import Atoms.Chemistry.Reductions.EliminateImplies
 import Atoms.Chemistry.Transformations.DeMorgan
 import Atoms.Chemistry.Transformations.DoubleNegation
@@ -61,6 +64,15 @@ import Atoms.Chemistry.Transformations.DoubleNegation
 import Text.Megaparsec
 import Data.Void
 import Data.Text (Text, pack)
+
+
+type SimpleMoleculeP = (Insert Parens
+                       (Insert Implies
+                       (Insert And 
+                       (Insert Or
+                       (Insert Not
+                       (Insert Variable ('Empty)))))))
+
 
 
 
@@ -76,22 +88,8 @@ type SimplerMolecule = (Insert And
                        (Insert Variable ('Empty)))))
 
 
-parseSomeMol :: Text -> Either (ParseErrorBundle Text Void) ((Molecule (VariantF SimpleMolecule)) # Pure) 
+parseSomeMol :: Text -> Either (ParseErrorBundle Text Void) ((Molecule (VariantF SimpleMoleculeP)) # Pure) 
 parseSomeMol = runParser (parser LeftRecursive) "" 
-
-
-
-testSomeMol :: Either (ParseErrorBundle Text Void) ((Molecule (VariantF SimpleMolecule)) # Pure) 
-testSomeMol = runParser (parser LeftRecursive) "" "a -> b \\/ c" 
-
---shouldParseAs :: (Pure # (Molecule (VariantF SimpleMolecule))) 
---shouldParseAs = iVariable "a" `iImplies` (iVariable "b" `iOr` iVariable "c") 
-
-
---testSimpleMolecule :: Pure # (Molecule (VariantF SimpleMolecule)) 
---                   -> Either (Pure # TypeError SimpleMolecule) (Pure # (Molecule (VariantF SimpleMolecule)))
-
---testSimpleMolecule expr  = execPureInfer (inferExpr expr)
 
 
 genTest :: IO (Pure # (Molecule (VariantF SimpleMolecule)))
@@ -111,25 +109,29 @@ main = do
         putStrLn "parsing"
         case parseSomeMol $ pack $ Pretty.render $ pPrint gend of
              Left err -> error $ show err 
-             Right p -> do
- 
+             Right q -> do
+                -- TODO implement equality on Molecules
+                -- p should equal gend since we parse Parens added by pretty printing then remove them 
+                let p = foldMolecule removeParens (Pure q)  
+                putStrLn "removeParens"
+                print $ pPrint p
                 putStrLn "deMorganNegationOfConjunctionFixed"
-                let p1 = deMorganNegationOfConjunctionFixed (Pure p)
+                let p1 = deMorganNegationOfConjunctionFixed p 
                 print $ fst p1
                 print $ pPrint $ snd p1 
                 putStrLn "deMorganNegationOfDisjunctionFixed"
-                let p1 = deMorganNegationOfDisjunctionFixed (Pure p)
+                let p1 = deMorganNegationOfDisjunctionFixed p 
                 print $ fst p1
                 print $ pPrint $ snd p1 
                
 
               
                 putStrLn "eliminateImplies"
-                let p2 :: Pure # Molecule (VariantF SimplerMolecule) = foldMolecule eliminateImplies (Pure p)
+                let p2 :: Pure # Molecule (VariantF SimplerMolecule) = foldMolecule eliminateImplies p 
                 print $ pPrint p2
 
                 putStrLn "doubleNegation"
-                let p3 :: Pure # Molecule (VariantF SimpleMolecule) = foldMolecule doubleNegation (Pure p)
+                let p3 :: Pure # Molecule (VariantF SimpleMolecule) = foldMolecule doubleNegation p 
                 print $ pPrint p3
 
                 putStrLn ""

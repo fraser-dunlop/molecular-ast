@@ -40,7 +40,7 @@ instance Gen1 IO Implies where
 
 instance Pretty1 Implies where
     liftPrintPrec prec lPrec lvl p (Implies a b) =
-       ((prec lvl p a) <+> Pretty.text "->" <+> (prec lvl p b)) -- & Pretty.parens 
+       ((prec lvl p a) <+> Pretty.text "->" <+> (prec lvl p b)) & Pretty.parens 
 
 
 

@@ -39,7 +39,7 @@ instance Gen1 IO Or where
 
 instance Pretty1 Or where
     liftPrintPrec prec lPrec lvl p (Or a b) =
-       ((prec lvl p a) <+> Pretty.text "\\/" <+> (prec lvl p b)) -- & Pretty.parens 
+       ((prec lvl p a) <+> Pretty.text "\\/" <+> (prec lvl p b)) & Pretty.parens 
 
 
 instance (Ord e) => ASumPrecLR Discriminator (ParsecT e Text m) Or where
