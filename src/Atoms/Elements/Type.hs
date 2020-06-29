@@ -1,9 +1,11 @@
+{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Atoms.Elements.Type where
 import Atoms.Elements.GenericProduct
 import Atoms.Molecule.AST
+import Atoms.Molecule.HasTypeConstraints
 import Atoms.Molecule.Infer1
 import Atoms.Molecule.ScopeTypes
 import Atoms.Molecule.Parser
@@ -27,7 +29,7 @@ import Type.Set.Variant
 import Type.Set.VariantF
 
 data Type h = Type Int
-  deriving (Eq, Ord, Show, Generic)
+  deriving (Eq, Ord, Show, Generic, Foldable, Traversable)
 
 
 instance Functor Type where
@@ -62,6 +64,10 @@ instance ( HasF Type g
          ) => Infer1 m (Molecule (VariantF g)) Type where
     liftInferBody (Type i) = do
        newTerm (Molecule (toVariantF (Type (i + 1)))) <&> (Molecule (toVariantF (Type i)), ) . MkANode 
+
+instance HasTypeConstraints1 g Type where 
+   verifyConstraints1 _ _ = Nothing
+
 
 instance ZipMatchable1 g Type where
    zipJoin1 (Type l) (Type r) = if l == r then Just (Type l) else Nothing

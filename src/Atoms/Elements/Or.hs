@@ -5,6 +5,7 @@
 module Atoms.Elements.Or where
 import Atoms.Elements.TypeBool
 import Atoms.Molecule.AST
+import Atoms.Molecule.HasTypeConstraints
 import Atoms.Molecule.Infer1
 import Atoms.Molecule.ScopeTypes
 import Atoms.Molecule.Parser
@@ -63,6 +64,9 @@ instance ( HasF Or g
        expected <- MkANode <$> newTerm (Molecule (toVariantF TypeBool))
        unify (aT ^. _ANode) (expected ^. _ANode)
        ((Molecule (toVariantF (Or aI bI)), ) . MkANode) <$> unify (aT ^. _ANode) (bT ^. _ANode)
+
+instance HasTypeConstraints1 g Or where 
+   verifyConstraints1 _ _ = Nothing
 
 instance ZipMatchable1 g Or where
    zipJoin1 (Or ll rl) (Or lr rr) = Just (Or (ll :*: lr) (rl :*: rr)) 

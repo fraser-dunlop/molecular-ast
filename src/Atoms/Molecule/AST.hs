@@ -34,3 +34,4 @@ foldMoleculeM :: forall g m a .
                  -> m a
 foldMoleculeM f (Pure (Molecule t)) =
     traverse (foldMoleculeM f) t >>= f
+

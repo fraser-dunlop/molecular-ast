@@ -43,6 +43,8 @@ import Atoms.Molecule.Gen
 import Atoms.Molecule.PureInfer
 import Atoms.Molecule.HasInferredType
 import Atoms.Molecule.HasTypeConstraints
+import Atoms.Molecule.VarType
+
 
 import Atoms.Molecule.Infer
 import Atoms.Molecule.Infer1
@@ -61,6 +63,9 @@ import Atoms.Chemistry.Reductions.EliminateIfAndOnlyIf
 import Atoms.Chemistry.Transformations.DeMorgan
 import Atoms.Chemistry.Transformations.DoubleNegation
 import Atoms.Chemistry.Telescopes.Example
+import Atoms.Chemistry.Dilution
+
+import Data.Proxy
 
 
 import Text.Megaparsec
@@ -97,6 +102,16 @@ type SimplestMolecule = (Insert And
                         (Insert Or
                         (Insert Not
                         (Insert Variable ('Empty)))))
+
+type SimplestMoleculeTypeable =  (Insert Type (Insert TypeBool (Insert And 
+                                 (Insert Or
+                                 (Insert Not
+                                 (Insert Variable ('Empty)))))))
+
+inferSimple :: Pure # (Molecule (VariantF SimplestMoleculeTypeable))
+       -> Either (TypeError SimplestMoleculeTypeable # Pure)
+                 (Pure # Scheme (Types SimplestMoleculeTypeable) (TypeOf (Molecule (VariantF SimplestMoleculeTypeable)))) 
+inferSimple = execPureInfer . inferExpr
 
 parseSomeMol :: Text -> Either (ParseErrorBundle Text Void) ((Molecule (VariantF SimpleMoleculeP)) # Pure) 
 parseSomeMol = runParser (parser LeftRecursive) "" 
@@ -184,6 +199,19 @@ main = do
                 print $ pPrint p10
 
 
+                let p11 :: Pure # Molecule (VariantF SimplestMoleculeTypeable) =
+                         dilute (Proxy @Type) $ dilute (Proxy @TypeBool) p9
+
+-- | type checks okay but crashes at runtime with
+-- molecular-ast-test-exe: (^?!): empty Fold
+-- CallStack (from HasCallStack):
+--  error, called at src/Control/Lens/Fold.hs:1310:28 in lens-4.18.1-44tD1ZSGzOC7tE3w8F9M7F:Control.Lens.Fold
+--  ^?!, called at src/Atoms/Molecule/VarType.hs:31:17 in molecular-ast-0.1.0.0-Es4X0GdIAVP4ZqpZAKnG0E:Atoms.Molecule.VarType
+--                case inferSimple p11 of
+--                    Left _ -> print "inference failed"
+--                    Right _ -> print "inference succeeded"
+
+            
 
                 putStrLn ""
 
