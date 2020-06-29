@@ -15,7 +15,7 @@ import Hyper.Type.AST.Var
 import Hyper.Unify.Generalize
 import Type.Set.VariantF
 
-
+import Debug.Trace
 
 
 instance VarType Name (Molecule (VariantF g)) where

@@ -89,7 +89,6 @@ inferExpr x =
                 htraverse_ (Proxy @(UnifyGen m) #> void . applyBindings) i
             ) (_HFlip # inferRes)
 
-
 --withEnv ::
 --    ( UnifyGen m (Molecule (VariantF g)), MonadReader env m
 --    , HasScheme (Molecule (VariantF g)) m (Types g) 
@@ -187,7 +186,7 @@ instance ( ForAllIn Traversable g
     binding = bindingDict (pisBindings . tTyp)
     unifyError e =
         htraverse (Proxy @(Unify (PureInfer g)) #> applyBindings) e
-        >>= throwError . TypError
+        >>= throwError . TypeError
 
 instance ( ForAllIn Traversable g
          , ForAllIn Foldable g

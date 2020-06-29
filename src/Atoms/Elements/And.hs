@@ -20,6 +20,7 @@ import Data.Random.RVar (RVar, runRVar)
 import Data.Random.Source.DevRandom (DevRandom(..))
 import GHC.Generics
 import Hyper
+import Hyper.Class.ZipMatch
 import Hyper.Infer
 import Hyper.Unify
 import Hyper.Unify.New
@@ -70,8 +71,7 @@ instance HasTypeConstraints1 g And where
    verifyConstraints1 _ _ = Nothing
 
 instance ZipMatchable1 g And where
-   zipJoin1 (And ll rl) (And lr rr) = Just (And (ll :*: lr) (rl :*: rr)) 
-
+   zipJoin1 (And l0 r0) (And l1 r1) = Just (And (l0 :*: l1) (r0 :*: r1)) 
 
 -- | injection
 iAnd :: (HasF And f, ForAllIn Functor f)

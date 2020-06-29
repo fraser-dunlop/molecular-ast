@@ -35,6 +35,7 @@ import Atoms.Elements.Variable
 import Atoms.Elements.Implies
 import Atoms.Elements.IfAndOnlyIf
 import Atoms.Elements.Parens
+import Atoms.Elements.Name
 import Atoms.Molecule.AST
 import Atoms.Molecule.TypeError
 import Atoms.Molecule.Parser
@@ -53,6 +54,7 @@ import Atoms.Molecule.InferScope
 import Atoms.Molecule.RTraversable
 import Atoms.Molecule.RTraversableInferOf
 import Atoms.Molecule.Types
+import Atoms.Molecule.ScopeTypes
 
 import Atoms.Chemistry.Cascades.DeMorgan
 
@@ -67,6 +69,10 @@ import Atoms.Chemistry.Dilution
 
 import Data.Proxy
 
+import Hyper.Unify.New
+import Hyper.Unify.Generalize
+
+import qualified Data.Map as Map
 
 import Text.Megaparsec
 import Data.Void
@@ -108,10 +114,40 @@ type SimplestMoleculeTypeable =  (Insert Type (Insert TypeBool (Insert And
                                  (Insert Not
                                  (Insert Variable ('Empty)))))))
 
+
+withTestEnv :: forall g m env a.
+    ( HasF TypeBool g
+    , HasF Type g
+    , ForAllIn Functor g
+    , UnifyGen m (Molecule (VariantF g)), MonadReader env m
+    , HasScheme (Types g) m (Molecule (VariantF g))
+    ) =>
+    Lens.LensLike' Lens.Identity env (InferScope g (UVarOf m)) -> m a -> m a
+withTestEnv l act = local (l %~ testEnv) act 
+   where testEnv :: InferScope g (UVarOf m) -> InferScope g (UVarOf m)
+         testEnv e = e { _varSchemes = ScopeTypes boolAlphabet } 
+         boolAlphabet :: Map.Map Name (HFlip GTerm (Molecule (VariantF g)) # (UVarOf m)) 
+         boolAlphabet = Map.fromList $ (zip (Name <$> ((:"") <$> ['a'..'v']))
+                                            (cycle [MkHFlip (GBody (Molecule (toVariantF TypeBool)))]))
+                                    ++ (zip (Name <$> ((:"") <$> ['w'..'x']))
+                                            (cycle [MkHFlip (GBody (Molecule (toVariantF (Type 1))))]))
+                                    ++ (zip (Name <$> ((:"") <$> ['y'..'z']))
+                                            (cycle [MkHFlip (GBody (Molecule (toVariantF (Type 0))))]))
+
+         
+--    do
+--        let boolType = (Molecule (toVariantF TypeBool))	
+--        local (l %~ addEnv boolType) act
+--        where addEnv :: _
+----              addEnv = undefined
+--              addEnv b x = sequence ((\nm -> x & varSchemes . _ScopeTypes . Lens.at nm ?~ b) <$> ((((:"") <$> ['a'..'z']))))
+
+
+
 inferSimple :: Pure # (Molecule (VariantF SimplestMoleculeTypeable))
        -> Either (TypeError SimplestMoleculeTypeable # Pure)
                  (Pure # Scheme (Types SimplestMoleculeTypeable) (TypeOf (Molecule (VariantF SimplestMoleculeTypeable)))) 
-inferSimple = execPureInfer . inferExpr
+inferSimple x = execPureInfer (withTestEnv id (inferExpr x))
 
 parseSomeMol :: Text -> Either (ParseErrorBundle Text Void) ((Molecule (VariantF SimpleMoleculeP)) # Pure) 
 parseSomeMol = runParser (parser LeftRecursive) "" 
@@ -202,14 +238,14 @@ main = do
                 let p11 :: Pure # Molecule (VariantF SimplestMoleculeTypeable) =
                          dilute (Proxy @Type) $ dilute (Proxy @TypeBool) p9
 
--- | type checks okay but crashes at runtime with
+-- | type checks okay but crashes at runtime with when variables are not in scope
 -- molecular-ast-test-exe: (^?!): empty Fold
 -- CallStack (from HasCallStack):
 --  error, called at src/Control/Lens/Fold.hs:1310:28 in lens-4.18.1-44tD1ZSGzOC7tE3w8F9M7F:Control.Lens.Fold
 --  ^?!, called at src/Atoms/Molecule/VarType.hs:31:17 in molecular-ast-0.1.0.0-Es4X0GdIAVP4ZqpZAKnG0E:Atoms.Molecule.VarType
---                case inferSimple p11 of
---                    Left _ -> print "inference failed"
---                    Right _ -> print "inference succeeded"
+                case inferSimple p11 of
+                    Left typerr -> print $ "inference failed: " ++ (Pretty.render (pPrint typerr))
+                    Right inferred -> print $ "inference success: " ++ (Pretty.render (pPrint inferred))
 
             
 
