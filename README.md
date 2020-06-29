@@ -16,14 +16,17 @@ Any chemistry set you design will play nicely with others and be open to extensi
 ## Define Reactions (Typed rewrite rules that operate on any Molecule that satisfies their constraints)
 - Reductions eliminate Elements from the Molecule
 - Transmutations rearrange structures whilst keeping the Atomic makeup the same
-- Cascades compose Reductions and Transmutations into complex chemical processes 
+- Cascades compose Transmutations and apply until fixed points are reached 
+- Telescopes compose Cascades and Reductions into complex chemical processes 
+
 
 ## Build complex Molecular AST transformations from a library of components
 - Atoms.Molecule contains generic Molecular definitions
 - Atoms.Elements contains a library of Atomic syntactic elements
 - Atoms.Chemistry.Reductions contains rules that eliminate elements from a Molecule
 - Atoms.Chemistry.Transformations contains rules that transform but do not guarantee elimination 
-- Atoms.Chemistry.Cascades contains rules composed from other rules
+- Atoms.Chemistry.Cascades contains fixed point applications of Transformations 
+- Atoms.Chemistry.Telescopes contains Telescopes of Reductions and Cascades
 
 # A detailed walkthrough
 - Molecular ASTs are HyperTypes indexed by type level sets of functors.
