@@ -18,7 +18,7 @@ Any chemistry set you design will play nicely with others and be open to extensi
 - Transmutations rearrange structures whilst keeping the Atomic makeup the same
 - Cascades compose Transmutations and apply until fixed points are reached 
 - Telescopes compose Cascades and Reductions into complex chemical processes 
-
+- Extractions extract information from a Molecule
 
 ## Build complex Molecular AST transformations from a library of components
 - Atoms.Molecule contains generic Molecular definitions
@@ -27,6 +27,7 @@ Any chemistry set you design will play nicely with others and be open to extensi
 - Atoms.Chemistry.Transformations contains rules that transform but do not guarantee elimination 
 - Atoms.Chemistry.Cascades contains fixed point applications of Transformations 
 - Atoms.Chemistry.Telescopes contains Telescopes of Reductions and Cascades
+- Atoms.Chemistry.Extractions contains Extractions
 
 # A detailed walkthrough
 - Molecular ASTs are HyperTypes indexed by type level sets of functors.

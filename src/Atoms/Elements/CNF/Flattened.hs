@@ -15,6 +15,8 @@ instance Functor FlatDisjunction where
 data FlatConjunction h where
    FlatConjunctionSingleton :: FlatDisjunction h -> FlatConjunction h
    FlatConjunctionNode :: FlatConjunction h -> FlatConjunction h -> FlatConjunction h
+   deriving (Eq, Ord, Generic, Generic1, Foldable, Traversable) 
+
 
 instance Functor FlatConjunction where
    fmap f (FlatConjunctionSingleton lit) = FlatConjunctionSingleton (fmap f lit)

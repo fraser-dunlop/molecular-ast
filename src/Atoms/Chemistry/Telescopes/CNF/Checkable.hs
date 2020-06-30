@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleInstances    #-}
-module Atoms.Chemistry.Telescopes.CheckableCNF where
+module Atoms.Chemistry.Telescopes.CNF.Checkable where
 import Atoms.Chemistry.Reductions.CNF.Conjunctions
 import Atoms.Chemistry.Reductions.CNF.Disjunctions
 import Atoms.Chemistry.Reductions.CNF.Literals
