@@ -5,6 +5,7 @@
 module Atoms.Elements.Variable where
 import Atoms.Elements.Name
 import Atoms.Molecule.AST
+import Atoms.Molecule.Class.VarType
 import Atoms.Molecule.HasTypeConstraints
 import Atoms.Molecule.Infer1
 import Atoms.Molecule.ScopeTypes
@@ -21,9 +22,6 @@ import Data.Random.Source.DevRandom (DevRandom(..))
 import GHC.Generics
 import Hyper
 import Hyper.Infer
---import Hyper.Type.AST.Var
-import Atoms.Molecule.Class.VarType
-
 import qualified Text.PrettyPrint as Pretty
 import Type.Set
 import Type.Set.Variant

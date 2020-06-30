@@ -12,7 +12,8 @@ class Infer1 m t g where
     liftInferBody :: ( MonadScopeLevel m
                      , LocalScopeType Name (UVarOf m # t) m
                      , LocalScopeType Name (GTerm (UVarOf m) # t) m
-                     , UnifyGen m t, Infer m t
+                     , UnifyGen m t
+                     , Infer m t
                      )
                   => g (InferChild m h # t) 
                   -> m ((t # h), InferOf t # UVarOf m)
