@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e61409806c2c64404a4477d24179f4940bbf8066fde13576ba82a60163f210b3
+-- hash: 31920839909a84dffd303e0032301035939d2f0d69afa4843789c30bbf845ff8
 
 name:           molecular-ast
 version:        0.1.0.0
@@ -31,10 +31,12 @@ library
       Atoms.Chemistry.Dilution
       Atoms.Chemistry.Reductions.CNF.Conjunctions
       Atoms.Chemistry.Reductions.CNF.Disjunctions
+      Atoms.Chemistry.Reductions.CNF.Flatten
       Atoms.Chemistry.Reductions.CNF.Literals
       Atoms.Chemistry.Reductions.EliminateIfAndOnlyIf
       Atoms.Chemistry.Reductions.EliminateImplies
       Atoms.Chemistry.Reductions.RemoveParens
+      Atoms.Chemistry.Telescopes.CNF.Flatten
       Atoms.Chemistry.Telescopes.Example
       Atoms.Chemistry.Telescopes.TransformToCheckableCNF
       Atoms.Chemistry.Transformations.DeMorgan
@@ -43,6 +45,7 @@ library
       Atoms.Elements.And
       Atoms.Elements.CNF.Conjunction
       Atoms.Elements.CNF.Disjunction
+      Atoms.Elements.CNF.Flattened
       Atoms.Elements.CNF.Literal
       Atoms.Elements.CNF.TypeConjunction
       Atoms.Elements.CNF.TypeDisjunction

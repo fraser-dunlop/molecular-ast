@@ -62,6 +62,8 @@ instance ( Ord e
          , ForAllIn Functor g)
          => Parser (ParsecT e Text m) (Molecule (VariantF g) # Pure) where
     parser d = Molecule <$> snd (liftASumPrecLR d parser)
+    -- ^. TODO can column and line numbers be embedded in Molecule so they can be used in 
+    -- providing informative type errors
 
 -- Pure with Molecule nest type can be parsed with this neat mutually recursive pair of instances
 -- so long as (VariantF g) has a ASumPrecLR instance.

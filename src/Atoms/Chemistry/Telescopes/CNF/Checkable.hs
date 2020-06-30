@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleInstances    #-}
-module Atoms.Chemistry.Telescopes.TransformToCheckableCNF where
+module Atoms.Chemistry.Telescopes.CheckableCNF where
 import Atoms.Chemistry.Reductions.CNF.Conjunctions
 import Atoms.Chemistry.Reductions.CNF.Disjunctions
 import Atoms.Chemistry.Reductions.CNF.Literals
@@ -13,14 +13,14 @@ import Type.Set.VariantF
 class ( Literals m a b
       , Disjunctions b c
       , Conjunctions c d 
-      ) => TransformToCheckableCNF m a b c d where
+      ) => CheckableCNF m a b c d where
     transformToCheckableCNF :: Pure # (Molecule (VariantF a)) 
                             -> m (Bool, Pure # (Molecule (VariantF d)))
 
 instance ( Literals m a b
          , Disjunctions b c
          , Conjunctions c d 
-         ) => TransformToCheckableCNF m a b c d where 
+         ) => CheckableCNF m a b c d where 
     transformToCheckableCNF molecule = do
         (cb, b) <- literals molecule
         let (cc, c) = disjunctions b

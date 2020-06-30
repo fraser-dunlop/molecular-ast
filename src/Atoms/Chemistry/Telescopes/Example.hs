@@ -18,8 +18,7 @@ class ( RemoveParens a b
     exampleTelescope :: Pure # (Molecule (VariantF a)) 
                      -> (Bool, Pure # (Molecule (VariantF d)))
 
-instance forall a b c d .
-         ( RemoveParens a b
+instance ( RemoveParens a b
          , EliminateImplies b c
          , EliminateIfAndOnlyIf c d 
          , DeMorganCascades d
