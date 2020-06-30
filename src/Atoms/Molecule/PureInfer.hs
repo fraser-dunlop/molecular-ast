@@ -54,6 +54,13 @@ newtype PureInfer g a =
 
 Lens.makePrisms ''PureInfer
 
+execPureInfer' :: (ForAllIn Functor g) => PureInfer g a
+              -> Either (TypeError g # Pure) (PureInferState g)
+execPureInfer' act =
+    runRWST (act ^. _PureInfer) emptyInferScope emptyPureInferState
+    <&> (^. Lens._2)
+
+
 execPureInfer :: (ForAllIn Functor g) => PureInfer g a
               -> Either (TypeError g # Pure) a
 execPureInfer act =

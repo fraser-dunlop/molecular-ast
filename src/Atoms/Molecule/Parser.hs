@@ -17,12 +17,6 @@ import qualified Text.Megaparsec.Char.Lexer as L
 import Type.Set.Variant
 import Type.Set.VariantF
 
--- | This module makes some bold parsing decisions in constructing a generic parser for Molecules
---  like allowing comments, consuming white-space, and allowing any term in the language to be in
---  parens (you lisp?)
---  This is likely to be revised to become more generic in the future.
---
---  Also thinking about whether ASumPrec1 is powerful enough. Do we need be context aware? 
 
 sc :: (Ord e) => ParsecT e Text m () 
 sc = L.space
@@ -43,6 +37,13 @@ maybeInParens :: (Ord e) => ParsecT e Text m a -> ParsecT e Text m a
 maybeInParens p = try (parens p) <|> p
 
 
+-- | When writing a left recursive parser fragment
+--         - match the Discriminator and parse empty on NotLeftRecursive
+--         - match the LeftRecursive Discriminator and
+--           - parse the left recursive branch by passing NotLeftRecursive to the sub-parser
+--           - parse other recursive branches by passing LeftRecursive
+--   When writing a non left recursive parser fragment
+--         - ignore the Discriminator pass LeftRecursive to sub-parsers
 data Discriminator = LeftRecursive | NotLeftRecursive
 
 
@@ -50,9 +51,9 @@ data Discriminator = LeftRecursive | NotLeftRecursive
 class Parser m a where
     parser :: Discriminator -> m a
 
--- When all the components of a VariantF are ASum1 then each can instance
+-- When all the components of a VariantF are ASumPrecLR then each can instance
 -- be looked up (using type level shenanigans) and tried in parallel
--- since (VariantF g) is an instance of ASum1 when all f's in g are instances of ASum1.
+-- since (VariantF g) is an instance of ASumPrecLR when all f's in g are instances of ASumPrecLR.
 
 -- Molecule with Pure nest type can be parsed with this neat mutually recursive pair of instances
 -- so long as (VariantF g) has a Asum1 instance.
@@ -63,7 +64,7 @@ instance ( Ord e
     parser d = Molecule <$> snd (liftASumPrecLR d parser)
 
 -- Pure with Molecule nest type can be parsed with this neat mutually recursive pair of instances
--- so long as (VariantF g) has a ASum1 instance.
+-- so long as (VariantF g) has a ASumPrecLR instance.
 instance ( Ord e
          , ASumPrecLR Discriminator (ParsecT e Text m) (VariantF g)
          , ForAllIn Functor g)
