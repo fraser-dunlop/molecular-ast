@@ -6,7 +6,7 @@
 module Atoms.Elements.CNF.Conjunction where
 import Atoms.Elements.CNF.TypeConjunction
 import Atoms.Elements.CNF.TypeDisjunction
-import Atoms.Elements.CNF.TypeLit
+import Atoms.Elements.CNF.TypeLiteral
 import Atoms.Molecule.AST
 import Atoms.Molecule.HasTypeConstraints
 import Atoms.Molecule.Infer1
@@ -60,7 +60,7 @@ instance (Ord e) => ASumPrecLR Discriminator (ParsecT e Text m) Conjunction wher
       )
 
 instance ( HasF Conjunction g
-         , HasF TypeLit g
+         , HasF TypeLiteral g
          , HasF TypeConjunction g
          , HasF TypeDisjunction g
          , ForAllIn Functor g
@@ -69,7 +69,7 @@ instance ( HasF Conjunction g
     liftInferBody (Conjunction a b) = do
        InferredChild aI aT <- inferChild a
        InferredChild bI bT <- inferChild b
-       expectedLit <- MkANode <$> newTerm (Molecule (toVariantF TypeLit))
+       expectedLit <- MkANode <$> newTerm (Molecule (toVariantF TypeLiteral))
        expectedDis <- MkANode <$> newTerm (Molecule (toVariantF TypeDisjunction))
        expectedCon <- MkANode <$> newTerm (Molecule (toVariantF TypeConjunction))
        catchError (unify (aT ^. _ANode) (expectedCon ^. _ANode))

@@ -4,7 +4,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Atoms.Elements.CNF.Literal where
-import Atoms.Elements.CNF.TypeLit
+import Atoms.Elements.CNF.TypeLiteral
 import Atoms.Elements.Name
 import Atoms.Molecule.AST
 import Atoms.Molecule.Class.VarType
@@ -83,20 +83,20 @@ instance (Ord e) => ASumPrecLR Discriminator (ParsecT e Text m) Literal where
       )
 
 instance ( HasF Literal g
-         , HasF TypeLit g
+         , HasF TypeLiteral g
          , ForAllIn Functor g
          , HasScope m (ScopeTypes g) 
          , VarType m Name (Molecule (VariantF g))
          , TypeOf (Molecule (VariantF g)) ~ (Molecule (VariantF g))
          ) => Infer1 m (Molecule (VariantF g)) Literal where
     liftInferBody (Positive v) = do
-       expected <- MkANode <$> newTerm (Molecule (toVariantF TypeLit))
+       expected <- MkANode <$> newTerm (Molecule (toVariantF TypeLiteral))
        (pI, pT) <- getScope >>= varType (Proxy @(Molecule (VariantF g))) v
                                   <&> MkANode
                                   <&> (Molecule (toVariantF (Positive v)), )       
        ((pI, ) . MkANode) <$> unify (pT ^. _ANode) (expected ^. _ANode)
     liftInferBody (Negative v) = do
-       expected <- MkANode <$> newTerm (Molecule (toVariantF TypeLit))
+       expected <- MkANode <$> newTerm (Molecule (toVariantF TypeLiteral))
        (pI, pT) <- getScope >>= varType (Proxy @(Molecule (VariantF g))) v
                                   <&> MkANode
                                   <&> (Molecule (toVariantF (Positive v)), )       

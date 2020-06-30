@@ -5,7 +5,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Atoms.Elements.CNF.Disjunction where
 import Atoms.Elements.CNF.TypeDisjunction
-import Atoms.Elements.CNF.TypeLit
+import Atoms.Elements.CNF.TypeLiteral
 import Atoms.Molecule.AST
 import Atoms.Molecule.HasTypeConstraints
 import Atoms.Molecule.Infer1
@@ -59,7 +59,7 @@ instance (Ord e) => ASumPrecLR Discriminator (ParsecT e Text m) Disjunction wher
       )
 
 instance ( HasF Disjunction g
-         , HasF TypeLit g
+         , HasF TypeLiteral g
          , HasF TypeDisjunction g
          , ForAllIn Functor g
          , MonadError (TypeError g h) m
@@ -67,7 +67,7 @@ instance ( HasF Disjunction g
     liftInferBody (Disjunction a b) = do
        InferredChild aI aT <- inferChild a
        InferredChild bI bT <- inferChild b
-       expectedLit <- MkANode <$> newTerm (Molecule (toVariantF TypeLit))
+       expectedLit <- MkANode <$> newTerm (Molecule (toVariantF TypeLiteral))
        expectedDis <- MkANode <$> newTerm (Molecule (toVariantF TypeDisjunction))
        catchError (unify (aT ^. _ANode) (expectedDis ^. _ANode))
                   (\_ -> unify (aT ^. _ANode) (expectedLit ^. _ANode))

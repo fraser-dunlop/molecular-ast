@@ -2,7 +2,7 @@
 {-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
-module Atoms.Elements.CNF.TypeLit where
+module Atoms.Elements.CNF.TypeLiteral where
 import Atoms.Elements.Type
 import Atoms.Molecule.AST
 import Atoms.Molecule.HasTypeConstraints
@@ -28,39 +28,39 @@ import Type.Set
 import Type.Set.Variant
 import Type.Set.VariantF
 
-data TypeLit h = TypeLit
+data TypeLiteral h = TypeLiteral
   deriving (Eq, Ord, Show, Generic, Foldable, Traversable)
 
 
-instance Functor TypeLit where
-   fmap f TypeLit = TypeLit
+instance Functor TypeLiteral where
+   fmap f TypeLiteral = TypeLiteral
 
-instance Gen1 IO TypeLit where
-  liftGen _ = pure TypeLit 
+instance Gen1 IO TypeLiteral where
+  liftGen _ = pure TypeLiteral 
 
-instance Pretty1 TypeLit where
-    liftPrintPrec _ _ _ _ TypeLit = Pretty.text "TypeLit"
+instance Pretty1 TypeLiteral where
+    liftPrintPrec _ _ _ _ TypeLiteral = Pretty.text "TypeLiteral"
 
-instance (Ord e) => ASumPrecLR Discriminator (ParsecT e Text m) TypeLit where
+instance (Ord e) => ASumPrecLR Discriminator (ParsecT e Text m) TypeLiteral where
     liftASumPrecLR _ p =
       ( 188
       , try $ do
-          _ <- symbol "TypeLit"
-          pure TypeLit
+          _ <- symbol "TypeLiteral"
+          pure TypeLiteral
       )
 
 instance ( HasF Type g
-         , HasF TypeLit g
+         , HasF TypeLiteral g
          , ForAllIn Functor g
-         ) => Infer1 m (Molecule (VariantF g)) TypeLit where
-    liftInferBody TypeLit = do
-       newTerm (Molecule (toVariantF (Type 0))) <&> (Molecule (toVariantF TypeLit), ) . MkANode 
+         ) => Infer1 m (Molecule (VariantF g)) TypeLiteral where
+    liftInferBody TypeLiteral = do
+       newTerm (Molecule (toVariantF (Type 0))) <&> (Molecule (toVariantF TypeLiteral), ) . MkANode 
 
 
-instance HasTypeConstraints1 g TypeLit where 
+instance HasTypeConstraints1 g TypeLiteral where 
    verifyConstraints1 _ _ = Nothing
 
-instance ZipMatchable1 g TypeLit where
-   zipJoin1 _ _ = Just TypeLit 
+instance ZipMatchable1 g TypeLiteral where
+   zipJoin1 _ _ = Just TypeLiteral 
 
 

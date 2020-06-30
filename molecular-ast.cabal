@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 019fe4a5209e066eb705a5f4f89d47df99d98164d1649195dd5283517e5d739b
+-- hash: e61409806c2c64404a4477d24179f4940bbf8066fde13576ba82a60163f210b3
 
 name:           molecular-ast
 version:        0.1.0.0
@@ -29,10 +29,14 @@ library
   exposed-modules:
       Atoms.Chemistry.Cascades.DeMorgan
       Atoms.Chemistry.Dilution
+      Atoms.Chemistry.Reductions.CNF.Conjunctions
+      Atoms.Chemistry.Reductions.CNF.Disjunctions
+      Atoms.Chemistry.Reductions.CNF.Literals
       Atoms.Chemistry.Reductions.EliminateIfAndOnlyIf
       Atoms.Chemistry.Reductions.EliminateImplies
       Atoms.Chemistry.Reductions.RemoveParens
       Atoms.Chemistry.Telescopes.Example
+      Atoms.Chemistry.Telescopes.TransformToCheckableCNF
       Atoms.Chemistry.Transformations.DeMorgan
       Atoms.Chemistry.Transformations.DoubleNegation
       Atoms.Chemistry.Utils.FixedPoint
@@ -42,7 +46,7 @@ library
       Atoms.Elements.CNF.Literal
       Atoms.Elements.CNF.TypeConjunction
       Atoms.Elements.CNF.TypeDisjunction
-      Atoms.Elements.CNF.TypeLit
+      Atoms.Elements.CNF.TypeLiteral
       Atoms.Elements.GenericProduct
       Atoms.Elements.IfAndOnlyIf
       Atoms.Elements.Implies
@@ -85,7 +89,8 @@ library
       src
   default-extensions: ConstraintKinds DataKinds DefaultSignatures DeriveGeneric DerivingStrategies GADTs GeneralizedNewtypeDeriving LambdaCase MultiParamTypeClasses RankNTypes ScopedTypeVariables StandaloneDeriving TupleSections TypeApplications TypeOperators TypeFamilies
   build-depends:
-      async
+      STMonadTrans
+    , async
     , base >=4.7 && <5
     , base-compat
     , binary
@@ -120,7 +125,8 @@ executable molecular-ast-test-exe
   default-extensions: ConstraintKinds DataKinds DefaultSignatures DeriveGeneric DerivingStrategies GADTs GeneralizedNewtypeDeriving LambdaCase MultiParamTypeClasses RankNTypes ScopedTypeVariables StandaloneDeriving TupleSections TypeApplications TypeOperators TypeFamilies
   ghc-options: -Wall -Wcompat -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      async
+      STMonadTrans
+    , async
     , base >=4.7 && <5
     , base-compat
     , binary
@@ -157,7 +163,8 @@ test-suite molecular-ast-test
   default-extensions: ConstraintKinds DataKinds DefaultSignatures DeriveGeneric DerivingStrategies GADTs GeneralizedNewtypeDeriving LambdaCase MultiParamTypeClasses RankNTypes ScopedTypeVariables StandaloneDeriving TupleSections TypeApplications TypeOperators TypeFamilies
   ghc-options: -Wall -Wcompat -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      async
+      STMonadTrans
+    , async
     , base >=4.7 && <5
     , base-compat
     , binary

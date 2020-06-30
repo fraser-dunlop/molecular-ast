@@ -39,6 +39,13 @@ packages:
       sha256: 53d8b98b9e899d63f7e464670e908f6eb22d8a5ba0b6ea48182fb810b426f0f8
   original:
     hackage: flexible-defaults-0.0.3@sha256:6a7ab000561e1075003cb1053dfbbb4020ae2b02916776d1479c9c3fc82f5d0d,2508
+- completed:
+    hackage: STMonadTrans-0.4.4@sha256:437eec4fdf5f56e9cd4360e08ed7f8f9f5f02ff3f1d634a14dbc71e890035387,1946
+    pantry-tree:
+      size: 403
+      sha256: 60c7ae0e1d9efb768ed969eda689adef56385712403e97ac2440ff7410216234
+  original:
+    hackage: STMonadTrans-0.4.4@sha256:437eec4fdf5f56e9cd4360e08ed7f8f9f5f02ff3f1d634a14dbc71e890035387,1946
 snapshots:
 - completed:
     size: 531237
