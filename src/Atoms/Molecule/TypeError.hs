@@ -17,9 +17,12 @@ import Type.Set.VariantF
 data TypeError g h
     = TypeError (UnifyError (Molecule (VariantF g)) h)
     | QVarNotInScope Name
+    | VarNotInScope Name
     deriving Generic
 
 instance (ForAllIn Pretty1 g) => Pretty (TypeError g # Pure) where
     pPrintPrec lvl p (TypeError e) = pPrintPrec lvl p e
     pPrintPrec _ _ (QVarNotInScope x) =
         Pretty.text "quantified type variable not in scope" <+> pPrint x
+    pPrintPrec _ _ (VarNotInScope x) =
+        Pretty.text "variable not in scope" <+> pPrint x

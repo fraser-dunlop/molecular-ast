@@ -6,6 +6,7 @@ module Atoms.Molecule.PureInfer where
 import Atoms.Elements.Name
 import Atoms.Elements.Variable
 import Atoms.Molecule.AST
+import Atoms.Molecule.Class.VarType
 import Atoms.Molecule.HasTypeConstraints
 import Atoms.Molecule.InferScope
 import Atoms.Molecule.PureInferState
@@ -29,7 +30,6 @@ import Hyper.Infer.ScopeLevel
 import Hyper.Recurse
 import Hyper.Type.AST.Nominal
 import Hyper.Type.AST.Scheme
-import Hyper.Type.AST.Var
 import Hyper.Unify
 import Hyper.Unify.Apply
 import Hyper.Unify.Binding

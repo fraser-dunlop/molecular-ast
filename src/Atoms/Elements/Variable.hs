@@ -1,6 +1,7 @@
-{-# LANGUAGE DeriveTraversable #-}
-{-# LANGUAGE FlexibleContexts  #-}
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE DeriveTraversable    #-}
+{-# LANGUAGE FlexibleContexts     #-}
+{-# LANGUAGE FlexibleInstances    #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Atoms.Elements.Variable where
 import Atoms.Elements.Name
 import Atoms.Molecule.AST
@@ -20,7 +21,9 @@ import Data.Random.Source.DevRandom (DevRandom(..))
 import GHC.Generics
 import Hyper
 import Hyper.Infer
-import Hyper.Type.AST.Var
+--import Hyper.Type.AST.Var
+import Atoms.Molecule.Class.VarType
+
 import qualified Text.PrettyPrint as Pretty
 import Type.Set
 import Type.Set.Variant
@@ -65,7 +68,7 @@ instance (Ord e) => ASumPrecLR Discriminator (ParsecT e Text m) Variable where
 instance ( HasF Variable g
          , ForAllIn Functor g
          , HasScope m (ScopeTypes g) 
-         , VarType Name (Molecule (VariantF g))
+         , VarType m Name (Molecule (VariantF g))
          , TypeOf (Molecule (VariantF g)) ~ (Molecule (VariantF g))
          ) => Infer1 m (Molecule (VariantF g)) Variable where
     liftInferBody (Variable v) = do

@@ -4,21 +4,21 @@ import qualified Control.Lens as Lens
 import           Control.Lens.Operators
 import           Control.Monad.Except
 import           Control.Monad.RWS
-import           Control.Monad.ST
+
 import qualified Data.Map as Map
 import           Hyper
 import           Hyper.Infer
 import           Hyper.Unify
-import           Hyper.Unify.Apply
+
 import           Hyper.Unify.Generalize
-import           Hyper.Unify.QuantifiedVar
-import           Hyper.Recurse
-import           Hyper.Type.AST.Nominal
+
+
+
 import           Hyper.Type.AST.Scheme
 --import           FOL 
-import           System.Exit (exitFailure)
+
 import qualified Text.PrettyPrint as Pretty
-import           Text.PrettyPrint.HughesPJClass (Pretty(..))
+
 --import           TypeLang
 
 import           Prelude
@@ -127,7 +127,7 @@ withTestEnv l act = local (l %~ testEnv) act
    where testEnv :: InferScope g (UVarOf m) -> InferScope g (UVarOf m)
          testEnv e = e { _varSchemes = ScopeTypes boolAlphabet } 
          boolAlphabet :: Map.Map Name (HFlip GTerm (Molecule (VariantF g)) # (UVarOf m)) 
-         boolAlphabet = Map.fromList $ (zip (Name <$> ((:"") <$> ['a'..'v']))
+         boolAlphabet = Map.fromList $ (zip (Name <$> ((:"") <$> ['c'..'v']))
                                             (cycle [MkHFlip (GBody (Molecule (toVariantF TypeBool)))]))
                                     ++ (zip (Name <$> ((:"") <$> ['w'..'x']))
                                             (cycle [MkHFlip (GBody (Molecule (toVariantF (Type 1))))]))

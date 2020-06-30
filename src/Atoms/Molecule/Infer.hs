@@ -9,7 +9,8 @@ import Atoms.Molecule.Infer1
 import Atoms.Molecule.InferOf
 import Hyper
 import Hyper.Infer
-import Hyper.Type.AST.Var
+--import Hyper.Type.AST.Var
+import Atoms.Molecule.Class.VarType
 import Hyper.Unify
 import Hyper.Unify.Generalize
 import Data.Constraint

@@ -8,7 +8,9 @@ import Data.Map (Map)
 import Generics.Constraints (makeDerivings)
 import Hyper
 import Hyper.Unify.Generalize
-import Hyper.Type.AST.Var
+--import Hyper.Type.AST.Var
+import Atoms.Molecule.Class.VarType
+
 import Type.Set.VariantF
 
 newtype ScopeTypes g v = ScopeTypes (Map Name (HFlip GTerm (Molecule (VariantF g)) v))
