@@ -32,8 +32,4 @@ Any chemistry set you design will play nicely with others and be open to extensi
 - Atoms.Chemistry.Solutions contains solver plugins for finding solutions to Constraints model Molecules
 
 # A detailed walkthrough
-- Molecular ASTs are HyperTypes indexed by type level sets of functors.
-- This construction allows for generic dispatch to Atomic methods for Parsing, Type Inference, etc...
-- Rewrite systems built with molecular-ast are made from many composable reaction fragments. 
-- These reaction fragments are defined at the class instance level and are composed by defining new classes called Cascades. See Atoms.Chemistry.Cascades for examples.
-- tutorial coming soon...
+coming soon...

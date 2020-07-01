@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 07cb05976682bd87e9dfab9ff437b784c681cfd9f4ab2abfcf09751dbb1a530a
+-- hash: c38cdd9c9885a2138cbc191f37740e33b24a69dc6d40fe84de430ac202d81670
 
 name:           molecular-ast
 version:        0.1.0.0
@@ -32,6 +32,7 @@ library
       Atoms.Chemistry.Cascades.PropCalc.DistributeOrsOverAnds
       Atoms.Chemistry.Cascades.PropCalc.DominationAndIdentity
       Atoms.Chemistry.Cascades.PropCalc.DoubleNegation
+      Atoms.Chemistry.Cascades.PropCalc.Idempotency
       Atoms.Chemistry.Cascades.PropCalc.NegateLitBool
       Atoms.Chemistry.Cascades.PropCalc.Tautology
       Atoms.Chemistry.Concentration
@@ -53,6 +54,7 @@ library
       Atoms.Chemistry.Transformations.PropCalc.DistributeOrsOverAnds
       Atoms.Chemistry.Transformations.PropCalc.DominationAndIdentity
       Atoms.Chemistry.Transformations.PropCalc.DoubleNegation
+      Atoms.Chemistry.Transformations.PropCalc.Idempotency
       Atoms.Chemistry.Transformations.PropCalc.NegateLitBool
       Atoms.Chemistry.Transformations.PropCalc.Tautology
       Atoms.Chemistry.Utils.FixedPoint
