@@ -4,7 +4,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Atoms.Chemistry.Dilution where
 import Atoms.Molecule.AST
-import Atoms.Elements.Type
+import Atoms.Elements.Generic.Type
 import Data.Proxy
 import Data.Type.Equality
 import Hyper

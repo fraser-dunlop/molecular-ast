@@ -4,7 +4,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Atoms.Molecule.PureInfer where
 import Atoms.Elements.Name
-import Atoms.Elements.Variable
+import Atoms.Elements.Generic.Variable
 import Atoms.Molecule.AST
 import Atoms.Molecule.Class.VarType
 import Atoms.Molecule.HasTypeConstraints

@@ -2,7 +2,7 @@
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Atoms.Chemistry.Reductions.RemoveParens where
-import Atoms.Elements.Parens
+import Atoms.Elements.Generic.Parens
 import Atoms.Elements.FOL.Not
 import Atoms.Elements.FOL.Or
 import Atoms.Molecule.AST

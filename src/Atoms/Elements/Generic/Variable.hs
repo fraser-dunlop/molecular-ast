@@ -2,7 +2,7 @@
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Atoms.Elements.Variable where
+module Atoms.Elements.Generic.Variable where
 import Atoms.Elements.Name
 import Atoms.Molecule.AST
 import Atoms.Molecule.Class.VarType

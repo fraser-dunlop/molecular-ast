@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: fa4b146aba7b93eb2f4c01ecf8284f642879d19861ebe21c03b30b2ef1af45b9
+-- hash: 3f211af01433a6f4c3316da894bdd0ab78f51186ae571c64b3faf3841efe2663
 
 name:           molecular-ast
 version:        0.1.0.0
@@ -62,11 +62,10 @@ library
       Atoms.Elements.FOL.Not
       Atoms.Elements.FOL.Or
       Atoms.Elements.FOL.TypeBool
-      Atoms.Elements.GenericProduct
+      Atoms.Elements.Generic.Parens
+      Atoms.Elements.Generic.Type
+      Atoms.Elements.Generic.Variable
       Atoms.Elements.Name
-      Atoms.Elements.Parens
-      Atoms.Elements.Type
-      Atoms.Elements.Variable
       Atoms.Molecule
       Atoms.Molecule.AST
       Atoms.Molecule.Class.VarType
