@@ -2,7 +2,7 @@
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Atoms.Chemistry.Reductions.CNF.Disjunctions where
-import Atoms.Elements.FOL.Or
+import Atoms.Elements.PropCalc.Or
 import Atoms.Elements.CNF.Disjunction
 import Atoms.Molecule.AST
 import Data.Type.Equality

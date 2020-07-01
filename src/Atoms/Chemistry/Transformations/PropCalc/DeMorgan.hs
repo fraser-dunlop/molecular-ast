@@ -1,10 +1,10 @@
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Atoms.Chemistry.Transformations.DeMorgan where
-import Atoms.Elements.FOL.And
-import Atoms.Elements.FOL.Not
-import Atoms.Elements.FOL.Or
+module Atoms.Chemistry.Transformations.PropCalc.DeMorgan where
+import Atoms.Elements.PropCalc.And
+import Atoms.Elements.PropCalc.Not
+import Atoms.Elements.PropCalc.Or
 import Atoms.Molecule.AST
 import Data.Type.Equality
 import Hyper

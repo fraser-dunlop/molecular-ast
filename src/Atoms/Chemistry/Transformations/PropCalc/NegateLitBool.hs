@@ -1,9 +1,9 @@
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Atoms.Chemistry.Transformations.FOL.NegateLitBool where
-import Atoms.Elements.FOL.LitBool
-import Atoms.Elements.FOL.Not
+module Atoms.Chemistry.Transformations.PropCalc.NegateLitBool where
+import Atoms.Elements.PropCalc.LitBool
+import Atoms.Elements.PropCalc.Not
 import Atoms.Molecule.AST
 import Data.Type.Equality
 import Hyper

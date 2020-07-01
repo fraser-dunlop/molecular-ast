@@ -1,10 +1,10 @@
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Atoms.Chemistry.Transformations.FOL.LitBoolElimination where
-import Atoms.Elements.FOL.And
-import Atoms.Elements.FOL.LitBool
-import Atoms.Elements.FOL.Or
+module Atoms.Chemistry.Transformations.PropCalc.DominationAndIdentity where
+import Atoms.Elements.PropCalc.And
+import Atoms.Elements.PropCalc.LitBool
+import Atoms.Elements.PropCalc.Or
 import Atoms.Molecule.AST
 import Data.Type.Equality
 import Hyper
@@ -14,15 +14,17 @@ import Type.Set.VariantF
 import Data.STRef
 import Control.Monad.ST
 
+-- Domination
+-- False /\ a == False
+-- a /\ False == False
+-- True \/ a == True
+-- a \/ True == True
+--
+-- Identity
+-- False \/ a == a
+-- a \/ False == a
 -- True /\ a == a
 -- a /\ True == a
--- False /\ a == False
--- a /\ False = False
---
--- True \/ a = True
--- a \/ True = True
--- False \/ a = a
--- a \/ False = a
 
 class ( HasF And t
       , HasF LitBool t
@@ -36,8 +38,8 @@ class ( HasF And t
       , FromSides (Locate LitBool t)
       , Follow (Locate Or t) t ~ Or 
       , FromSides (Locate Or t)
-      ) => LitBoolElimination t where
-    litBoolElimination ::  STRef s Bool
+      ) => DominationAndIdentity t where
+    dominationAndIdentity ::  STRef s Bool
                        -> VariantF t (Pure # Molecule (VariantF t))
                        -> ST s (Pure # Molecule (VariantF t))
 
@@ -53,8 +55,8 @@ instance ( HasF And t
          , FromSides (Locate LitBool t)
          , Follow (Locate Or t) t ~ Or 
          , FromSides (Locate Or t)
-         ) => LitBoolElimination t where
-    litBoolElimination changed v@(VariantF tag res) =
+         ) => DominationAndIdentity t where
+    dominationAndIdentity changed v@(VariantF tag res) =
         case testEquality tag (fromSides @(Locate And t)) of
           Just Refl ->
             case res of

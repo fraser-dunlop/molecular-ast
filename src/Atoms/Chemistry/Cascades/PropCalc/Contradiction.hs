@@ -1,8 +1,8 @@
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Atoms.Chemistry.Cascades.FOL.Contradiction where
-import Atoms.Chemistry.Transformations.FOL.Contradiction
+module Atoms.Chemistry.Cascades.PropCalc.Contradiction where
+import Atoms.Chemistry.Transformations.PropCalc.Contradiction
 import Atoms.Chemistry.Utils.FixedPoint
 import Atoms.Molecule.AST
 import Data.Type.Equality

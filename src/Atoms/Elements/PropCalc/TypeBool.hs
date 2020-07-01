@@ -2,7 +2,7 @@
 {-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
-module Atoms.Elements.FOL.TypeBool where
+module Atoms.Elements.PropCalc.TypeBool where
 import Atoms.Elements.Generic.Type
 import Atoms.Molecule.AST
 import Atoms.Molecule.HasTypeConstraints

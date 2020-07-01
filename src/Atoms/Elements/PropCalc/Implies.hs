@@ -2,8 +2,8 @@
 {-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
-module Atoms.Elements.FOL.Or where
-import Atoms.Elements.FOL.TypeBool
+module Atoms.Elements.PropCalc.Implies where
+import Atoms.Elements.PropCalc.TypeBool
 import Atoms.Molecule.AST
 import Atoms.Molecule.HasTypeConstraints
 import Atoms.Molecule.Infer1
@@ -29,55 +29,56 @@ import Type.Set
 import Type.Set.Variant
 import Type.Set.VariantF
 
-data Or h = Or h h  
+
+data Implies h = Implies h h  
   deriving (Eq, Ord, Show, Generic, Foldable, Traversable)
 
-instance Functor Or where
-   fmap f (Or l r) = Or (f l) (f r) 
+instance Functor Implies where
+   fmap f (Implies l r) = Implies (f l) (f r) 
 
-instance Gen1 IO Or where
-  liftGen _ = Or <$> gen <*> gen
+instance Gen1 IO Implies where
+  liftGen _ = Implies <$> gen <*> gen
 
-instance Pretty1 Or where
-    liftPrintPrec prec lPrec lvl p (Or a b) =
-       ((prec lvl p a) <+> Pretty.text "\\/" <+> (prec lvl p b)) & Pretty.parens 
+instance Pretty1 Implies where
+    liftPrintPrec prec lPrec lvl p (Implies a b) =
+       ((prec lvl p a) <+> Pretty.text "->" <+> (prec lvl p b)) & Pretty.parens 
 
 
-instance (Ord e) => ASumPrecLR Discriminator (ParsecT e Text m) Or where
-    liftASumPrecLR NotLeftRecursive p = ( minBound, empty )
+
+instance (Ord e) => ASumPrecLR Discriminator (ParsecT e Text m) Implies where
+    liftASumPrecLR NotLeftRecursive _ = ( minBound, empty ) 
     liftASumPrecLR LeftRecursive p =
-      ( (420 :: Int) 
+      ( 420 
       , try $ do
         l <- p NotLeftRecursive
-        _ <- symbol "\\/" 
+        _ <- symbol "->" 
         r <- (try (p NotLeftRecursive)) <|> p LeftRecursive
-        pure $ Or l r
+        pure $ Implies l r
       )
 
-instance ( HasF Or g
+instance ( HasF Implies g
          , HasF TypeBool g
          , ForAllIn Functor g
-         ) => Infer1 m (Molecule (VariantF g)) Or where
-    liftInferBody (Or a b) = do
+         ) => Infer1 m (Molecule (VariantF g)) Implies where
+    liftInferBody (Implies a b) = do
        InferredChild aI aT <- inferChild a
        InferredChild bI bT <- inferChild b
        expected <- MkANode <$> newTerm (Molecule (toVariantF TypeBool))
        unify (aT ^. _ANode) (expected ^. _ANode)
-       ((Molecule (toVariantF (Or aI bI)), ) . MkANode) <$> unify (aT ^. _ANode) (bT ^. _ANode)
+       ((Molecule (toVariantF (Implies aI bI)), ) . MkANode) <$> unify (aT ^. _ANode) (bT ^. _ANode)
 
-instance HasTypeConstraints1 g Or where 
+instance HasTypeConstraints1 g Implies where 
    verifyConstraints1 _ _ = Nothing
 
-instance ZipMatchable1 g Or where
-   zipJoin1 (Or ll rl) (Or lr rr) = Just (Or (ll :*: lr) (rl :*: rr)) 
+instance ZipMatchable1 g Implies where
+   zipJoin1 (Implies ll rl) (Implies lr rr) = Just (Implies (ll :*: lr) (rl :*: rr)) 
 
 
 -- | injection
-iOr :: (HasF Or f, ForAllIn Functor f)
-    => Pure # Molecule (VariantF f)
-    -> Pure # Molecule (VariantF f)
-    -> Pure # Molecule (VariantF f)
-iOr l r = Pure $ Molecule $ toVariantF (Or l r)
-
+iImplies :: (HasF Implies f, ForAllIn Functor f)
+     => Pure # Molecule (VariantF f)
+     -> Pure # Molecule (VariantF f)
+     -> Pure # Molecule (VariantF f)
+iImplies l r = Pure $ Molecule $ toVariantF (Implies l r)
 
 

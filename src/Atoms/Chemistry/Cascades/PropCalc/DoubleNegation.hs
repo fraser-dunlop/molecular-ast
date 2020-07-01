@@ -1,8 +1,8 @@
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Atoms.Chemistry.Cascades.DoubleNegation where
-import Atoms.Chemistry.Transformations.DoubleNegation
+module Atoms.Chemistry.Cascades.PropCalc.DoubleNegation where
+import Atoms.Chemistry.Transformations.PropCalc.DoubleNegation
 import Atoms.Chemistry.Utils.FixedPoint
 import Atoms.Molecule.AST
 import Data.Type.Equality

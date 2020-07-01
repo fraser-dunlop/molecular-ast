@@ -1,8 +1,8 @@
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Atoms.Chemistry.Cascades.DistributeOrsOverAnds where
-import Atoms.Chemistry.Transformations.DistributeOrsOverAnds
+module Atoms.Chemistry.Cascades.PropCalc.DistributeOrsOverAnds where
+import Atoms.Chemistry.Transformations.PropCalc.DistributeOrsOverAnds
 import Atoms.Chemistry.Utils.FixedPoint
 import Atoms.Molecule.AST
 import Data.Type.Equality

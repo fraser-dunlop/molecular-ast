@@ -15,7 +15,7 @@ import           Hyper.Unify.Generalize
 
 
 import           Hyper.Type.AST.Scheme
---import           FOL 
+--import           PropCalc 
 
 import qualified Text.PrettyPrint as Pretty
 
@@ -27,14 +27,14 @@ import Type.Set
 import Type.Set.Variant
 import Type.Set.VariantF
 import Atoms.Elements.Generic.Type
-import Atoms.Elements.FOL.TypeBool
-import Atoms.Elements.FOL.LitBool
-import Atoms.Elements.FOL.And
-import Atoms.Elements.FOL.Or
-import Atoms.Elements.FOL.Not
+import Atoms.Elements.PropCalc.TypeBool
+import Atoms.Elements.PropCalc.LitBool
+import Atoms.Elements.PropCalc.And
+import Atoms.Elements.PropCalc.Or
+import Atoms.Elements.PropCalc.Not
 import Atoms.Elements.Generic.Variable
-import Atoms.Elements.FOL.Implies
-import Atoms.Elements.FOL.IfAndOnlyIf
+import Atoms.Elements.PropCalc.Implies
+import Atoms.Elements.PropCalc.IfAndOnlyIf
 import Atoms.Elements.Generic.Parens
 import Atoms.Elements.Name
 import Atoms.Molecule.AST
@@ -57,14 +57,14 @@ import Atoms.Molecule.RTraversableInferOf()
 import Atoms.Molecule.Types
 import Atoms.Molecule.ScopeTypes
 
-import Atoms.Chemistry.Cascades.DeMorgan
+import Atoms.Chemistry.Cascades.PropCalc.DeMorgan
 
 import Atoms.Chemistry.Reductions.RemoveParens
 
 import Atoms.Chemistry.Reductions.EliminateImplies
 import Atoms.Chemistry.Reductions.EliminateIfAndOnlyIf
-import Atoms.Chemistry.Transformations.DeMorgan
-import Atoms.Chemistry.Transformations.DoubleNegation
+import Atoms.Chemistry.Transformations.PropCalc.DeMorgan
+import Atoms.Chemistry.Transformations.PropCalc.DoubleNegation
 import Atoms.Chemistry.Telescopes.Example
 import Atoms.Chemistry.Dilution
 import Atoms.Chemistry.Concentration
@@ -80,7 +80,7 @@ import Atoms.Elements.CNF.Disjunction
 import Atoms.Elements.CNF.Conjunction
 import Atoms.Elements.CNF.Flattened
 import Atoms.Chemistry.Reductions.CNF.Literals
-import Atoms.Chemistry.Telescopes.CNF.Checkable
+import Atoms.Chemistry.Telescopes.PropCalcToCNF.Checkable
 import Atoms.Chemistry.Telescopes.CNF.Flatten
 import Atoms.Chemistry.Extractions.CNF.Flattened
 

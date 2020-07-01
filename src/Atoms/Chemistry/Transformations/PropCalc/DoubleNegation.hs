@@ -1,8 +1,8 @@
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Atoms.Chemistry.Transformations.DoubleNegation where
-import Atoms.Elements.FOL.Not
+module Atoms.Chemistry.Transformations.PropCalc.DoubleNegation where
+import Atoms.Elements.PropCalc.Not
 import Atoms.Molecule.AST
 import Data.Type.Equality
 import Hyper

@@ -1,8 +1,8 @@
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Atoms.Chemistry.Cascades.DeMorgan where
-import Atoms.Chemistry.Transformations.DeMorgan
+module Atoms.Chemistry.Cascades.PropCalc.DeMorgan where
+import Atoms.Chemistry.Transformations.PropCalc.DeMorgan
 import Atoms.Chemistry.Utils.FixedPoint
 import Atoms.Molecule.AST
 import Data.Type.Equality

@@ -1,8 +1,8 @@
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Atoms.Chemistry.Cascades.FOL.NegateLitBool where
-import Atoms.Chemistry.Transformations.FOL.NegateLitBool
+module Atoms.Chemistry.Cascades.PropCalc.NegateLitBool where
+import Atoms.Chemistry.Transformations.PropCalc.NegateLitBool
 import Atoms.Chemistry.Utils.FixedPoint
 import Atoms.Molecule.AST
 import Data.Type.Equality

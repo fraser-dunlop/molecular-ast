@@ -1,10 +1,10 @@
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Atoms.Chemistry.Transformations.FOL.Tautology where
-import Atoms.Elements.FOL.LitBool
-import Atoms.Elements.FOL.Not
-import Atoms.Elements.FOL.Or
+module Atoms.Chemistry.Transformations.PropCalc.Tautology where
+import Atoms.Elements.PropCalc.LitBool
+import Atoms.Elements.PropCalc.Not
+import Atoms.Elements.PropCalc.Or
 import Atoms.Elements.Generic.Variable
 import Atoms.Molecule.AST
 import Data.Type.Equality

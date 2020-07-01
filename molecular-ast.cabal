@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 7835ada40a8a0323c4970a1c46ca41e262013fa0c30b199ba51d59a4a750332a
+-- hash: 07cb05976682bd87e9dfab9ff437b784c681cfd9f4ab2abfcf09751dbb1a530a
 
 name:           molecular-ast
 version:        0.1.0.0
@@ -27,13 +27,13 @@ source-repository head
 
 library
   exposed-modules:
-      Atoms.Chemistry.Cascades.DeMorgan
-      Atoms.Chemistry.Cascades.DistributeOrsOverAnds
-      Atoms.Chemistry.Cascades.DoubleNegation
-      Atoms.Chemistry.Cascades.FOL.Contradiction
-      Atoms.Chemistry.Cascades.FOL.LitBoolElimination
-      Atoms.Chemistry.Cascades.FOL.NegateLitBool
-      Atoms.Chemistry.Cascades.FOL.Tautology
+      Atoms.Chemistry.Cascades.PropCalc.Contradiction
+      Atoms.Chemistry.Cascades.PropCalc.DeMorgan
+      Atoms.Chemistry.Cascades.PropCalc.DistributeOrsOverAnds
+      Atoms.Chemistry.Cascades.PropCalc.DominationAndIdentity
+      Atoms.Chemistry.Cascades.PropCalc.DoubleNegation
+      Atoms.Chemistry.Cascades.PropCalc.NegateLitBool
+      Atoms.Chemistry.Cascades.PropCalc.Tautology
       Atoms.Chemistry.Concentration
       Atoms.Chemistry.Dilution
       Atoms.Chemistry.Extractions.CNF.Flattened
@@ -45,16 +45,16 @@ library
       Atoms.Chemistry.Reductions.EliminateImplies
       Atoms.Chemistry.Reductions.RemoveParens
       Atoms.Chemistry.Solutions.CNF.MiniSat
-      Atoms.Chemistry.Telescopes.CNF.Checkable
       Atoms.Chemistry.Telescopes.CNF.Flatten
       Atoms.Chemistry.Telescopes.Example
-      Atoms.Chemistry.Transformations.DeMorgan
-      Atoms.Chemistry.Transformations.DistributeOrsOverAnds
-      Atoms.Chemistry.Transformations.DoubleNegation
-      Atoms.Chemistry.Transformations.FOL.Contradiction
-      Atoms.Chemistry.Transformations.FOL.LitBoolElimination
-      Atoms.Chemistry.Transformations.FOL.NegateLitBool
-      Atoms.Chemistry.Transformations.FOL.Tautology
+      Atoms.Chemistry.Telescopes.PropCalcToCNF.Checkable
+      Atoms.Chemistry.Transformations.PropCalc.Contradiction
+      Atoms.Chemistry.Transformations.PropCalc.DeMorgan
+      Atoms.Chemistry.Transformations.PropCalc.DistributeOrsOverAnds
+      Atoms.Chemistry.Transformations.PropCalc.DominationAndIdentity
+      Atoms.Chemistry.Transformations.PropCalc.DoubleNegation
+      Atoms.Chemistry.Transformations.PropCalc.NegateLitBool
+      Atoms.Chemistry.Transformations.PropCalc.Tautology
       Atoms.Chemistry.Utils.FixedPoint
       Atoms.Elements.CNF.Conjunction
       Atoms.Elements.CNF.Disjunction
@@ -63,17 +63,17 @@ library
       Atoms.Elements.CNF.TypeConjunction
       Atoms.Elements.CNF.TypeDisjunction
       Atoms.Elements.CNF.TypeLiteral
-      Atoms.Elements.FOL.And
-      Atoms.Elements.FOL.IfAndOnlyIf
-      Atoms.Elements.FOL.Implies
-      Atoms.Elements.FOL.LitBool
-      Atoms.Elements.FOL.Not
-      Atoms.Elements.FOL.Or
-      Atoms.Elements.FOL.TypeBool
       Atoms.Elements.Generic.Parens
       Atoms.Elements.Generic.Type
       Atoms.Elements.Generic.Variable
       Atoms.Elements.Name
+      Atoms.Elements.PropCalc.And
+      Atoms.Elements.PropCalc.IfAndOnlyIf
+      Atoms.Elements.PropCalc.Implies
+      Atoms.Elements.PropCalc.LitBool
+      Atoms.Elements.PropCalc.Not
+      Atoms.Elements.PropCalc.Or
+      Atoms.Elements.PropCalc.TypeBool
       Atoms.Molecule
       Atoms.Molecule.AST
       Atoms.Molecule.Class.VarType

@@ -2,8 +2,8 @@
 {-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
-module Atoms.Elements.FOL.IfAndOnlyIf where
-import Atoms.Elements.FOL.TypeBool
+module Atoms.Elements.PropCalc.And where
+import Atoms.Elements.PropCalc.TypeBool
 import Atoms.Molecule.AST
 import Atoms.Molecule.HasTypeConstraints
 import Atoms.Molecule.Infer1
@@ -20,6 +20,7 @@ import Data.Random.RVar (RVar, runRVar)
 import Data.Random.Source.DevRandom (DevRandom(..))
 import GHC.Generics
 import Hyper
+import Hyper.Class.ZipMatch
 import Hyper.Infer
 import Hyper.Unify
 import Hyper.Unify.New
@@ -30,55 +31,54 @@ import Type.Set.Variant
 import Type.Set.VariantF
 
 
-data IfAndOnlyIf h = IfAndOnlyIf h h  
+data And h = And h h  
   deriving (Eq, Ord, Show, Generic, Foldable, Traversable)
 
-instance Functor IfAndOnlyIf where
-   fmap f (IfAndOnlyIf l r) = IfAndOnlyIf (f l) (f r) 
+instance Functor And where
+   fmap f (And l r) = And (f l) (f r) 
 
-instance Gen1 IO IfAndOnlyIf where
-  liftGen _ = IfAndOnlyIf <$> gen <*> gen
+instance Gen1 IO And where
+  liftGen _ = And <$> gen <*> gen
 
-instance Pretty1 IfAndOnlyIf where
-    liftPrintPrec prec lPrec lvl p (IfAndOnlyIf a b) =
-       ((prec lvl p a) <+> Pretty.text "<->" <+> (prec lvl p b)) & Pretty.parens 
+instance Pretty1 And where
+    liftPrintPrec prec lPrec lvl p (And a b) =
+       ((prec lvl p a) <+> Pretty.text "/\\" <+> (prec lvl p b)) & Pretty.parens 
 
 
 
-instance (Ord e) => ASumPrecLR Discriminator (ParsecT e Text m) IfAndOnlyIf where
-    liftASumPrecLR NotLeftRecursive _ = ( minBound, empty ) 
+instance (Ord e) => ASumPrecLR Discriminator (ParsecT e Text m) And where
+    liftASumPrecLR NotLeftRecursive _ = ( minBound, empty )
     liftASumPrecLR LeftRecursive p =
       ( 420 
-      ,  try $ do
+      , try $ do
         l <- p NotLeftRecursive
-        _ <- symbol "<->" 
+        _ <- symbol "/\\" 
         r <- (try (p NotLeftRecursive)) <|> p LeftRecursive
-        pure $ IfAndOnlyIf l r
+        pure $ And l r
       )
 
-instance ( HasF IfAndOnlyIf g
+instance ( HasF And g
          , HasF TypeBool g
          , ForAllIn Functor g
-         ) => Infer1 m (Molecule (VariantF g)) IfAndOnlyIf where
-    liftInferBody (IfAndOnlyIf a b) = do
+         ) => Infer1 m (Molecule (VariantF g)) And where
+    liftInferBody (And a b) = do
        InferredChild aI aT <- inferChild a
        InferredChild bI bT <- inferChild b
        expected <- MkANode <$> newTerm (Molecule (toVariantF TypeBool))
        unify (aT ^. _ANode) (expected ^. _ANode)
-       ((Molecule (toVariantF (IfAndOnlyIf aI bI)), ) . MkANode) <$> unify (aT ^. _ANode) (bT ^. _ANode)
+       ((Molecule (toVariantF (And aI bI)), ) . MkANode) <$> unify (aT ^. _ANode) (bT ^. _ANode)
 
-instance HasTypeConstraints1 g IfAndOnlyIf where 
+instance HasTypeConstraints1 g And where 
    verifyConstraints1 _ _ = Nothing
 
-instance ZipMatchable1 g IfAndOnlyIf where
-   zipJoin1 (IfAndOnlyIf ll rl) (IfAndOnlyIf lr rr) = Just (IfAndOnlyIf (ll :*: lr) (rl :*: rr)) 
-
+instance ZipMatchable1 g And where
+   zipJoin1 (And l0 r0) (And l1 r1) = Just (And (l0 :*: l1) (r0 :*: r1)) 
 
 -- | injection
-iIfAndOnlyIf :: (HasF IfAndOnlyIf f, ForAllIn Functor f)
+iAnd :: (HasF And f, ForAllIn Functor f)
      => Pure # Molecule (VariantF f)
      -> Pure # Molecule (VariantF f)
      -> Pure # Molecule (VariantF f)
-iIfAndOnlyIf l r = Pure $ Molecule $ toVariantF (IfAndOnlyIf l r)
+iAnd l r = Pure $ Molecule $ toVariantF (And l r)
 
 

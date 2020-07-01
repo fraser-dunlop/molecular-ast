@@ -1,8 +1,8 @@
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Atoms.Chemistry.Cascades.FOL.Tautology where
-import Atoms.Chemistry.Transformations.FOL.Tautology
+module Atoms.Chemistry.Cascades.PropCalc.Tautology where
+import Atoms.Chemistry.Transformations.PropCalc.Tautology
 import Atoms.Chemistry.Utils.FixedPoint
 import Atoms.Molecule.AST
 import Data.Type.Equality
