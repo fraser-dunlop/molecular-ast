@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 47de948704385ce17f80a4b6cceaae4c700b14f6518cff0e49468384d92e0033
+-- hash: 6be915b6b729794045cfaa099fc6aab9119b65c57d6e0ea41ec8be9133617f11
 
 name:           molecular-ast
 version:        0.1.0.0
@@ -37,6 +37,7 @@ library
       Atoms.Chemistry.Reductions.EliminateIfAndOnlyIf
       Atoms.Chemistry.Reductions.EliminateImplies
       Atoms.Chemistry.Reductions.RemoveParens
+      Atoms.Chemistry.Solutions.CNF.MiniSat
       Atoms.Chemistry.Telescopes.CNF.Checkable
       Atoms.Chemistry.Telescopes.CNF.Flatten
       Atoms.Chemistry.Telescopes.Example
@@ -109,6 +110,7 @@ library
     , lattices
     , lens
     , megaparsec
+    , minisat-solver
     , monad-st
     , mtl
     , pretty
@@ -145,6 +147,7 @@ executable molecular-ast-test-exe
     , lattices
     , lens
     , megaparsec
+    , minisat-solver
     , molecular-ast
     , monad-st
     , mtl
@@ -183,6 +186,7 @@ test-suite molecular-ast-test
     , lattices
     , lens
     , megaparsec
+    , minisat-solver
     , molecular-ast
     , monad-st
     , mtl

@@ -45,6 +45,7 @@ dependencies:
 - type-sets
 - cmptype
 - STMonadTrans
+- minisat-solver
 
 default-extensions:
 - ConstraintKinds

@@ -19,6 +19,7 @@ Any chemistry set you design will play nicely with others and be open to extensi
 - Cascades compose Transmutations and apply until fixed points are reached 
 - Telescopes compose Cascades and Reductions into complex chemical processes 
 - Extractions extract information from a Molecule
+- Solutions find satisfying assignments to Molecules representing Contraints models
 
 ## Build complex Molecular AST transformations from a library of components
 - Atoms.Molecule contains generic Molecular definitions
@@ -27,7 +28,8 @@ Any chemistry set you design will play nicely with others and be open to extensi
 - Atoms.Chemistry.Transformations contains rules that transform but do not guarantee elimination 
 - Atoms.Chemistry.Cascades contains fixed point applications of Transformations 
 - Atoms.Chemistry.Telescopes contains Telescopes of Reductions and Cascades
-- Atoms.Chemistry.Extractions contains Extractions
+- Atoms.Chemistry.Extractions contains Extraction traversals
+- Atoms.Chemistry.Solutions contains solver plugins for finding solutions to Constraints model Molecules
 
 # A detailed walkthrough
 - Molecular ASTs are HyperTypes indexed by type level sets of functors.
