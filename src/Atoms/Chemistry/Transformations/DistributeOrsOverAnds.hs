@@ -2,8 +2,8 @@
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Atoms.Chemistry.Transformations.DistributeOrsOverAnds where
-import Atoms.Elements.And
-import Atoms.Elements.Or
+import Atoms.Elements.FOL.And
+import Atoms.Elements.FOL.Or
 import Atoms.Molecule.AST
 import Data.Type.Equality
 import Hyper

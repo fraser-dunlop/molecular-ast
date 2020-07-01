@@ -2,9 +2,9 @@
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Atoms.Chemistry.Reductions.EliminateImplies where
-import Atoms.Elements.Implies
-import Atoms.Elements.Not
-import Atoms.Elements.Or
+import Atoms.Elements.FOL.Implies
+import Atoms.Elements.FOL.Not
+import Atoms.Elements.FOL.Or
 import Atoms.Molecule.AST
 import Data.Type.Equality
 import Hyper

@@ -1,8 +1,8 @@
 {-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
-module Atoms.Elements.LitBool where
-import Atoms.Elements.TypeBool
+module Atoms.Elements.FOL.LitBool where
+import Atoms.Elements.FOL.TypeBool
 import Atoms.Molecule.AST
 import Atoms.Molecule.Infer1
 import Atoms.Molecule.ScopeTypes

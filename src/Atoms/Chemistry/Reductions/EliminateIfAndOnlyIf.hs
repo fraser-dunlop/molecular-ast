@@ -2,10 +2,10 @@
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Atoms.Chemistry.Reductions.EliminateIfAndOnlyIf where
-import Atoms.Elements.And
-import Atoms.Elements.IfAndOnlyIf
-import Atoms.Elements.Not
-import Atoms.Elements.Or
+import Atoms.Elements.FOL.And
+import Atoms.Elements.FOL.IfAndOnlyIf
+import Atoms.Elements.FOL.Not
+import Atoms.Elements.FOL.Or
 import Atoms.Molecule.AST
 import Data.Type.Equality
 import Hyper

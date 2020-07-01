@@ -3,7 +3,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Atoms.Elements.Parens where
-import Atoms.Elements.TypeBool
 import Atoms.Molecule.AST
 import Atoms.Molecule.HasTypeConstraints
 import Atoms.Molecule.Infer1
@@ -50,7 +49,6 @@ instance (Ord e) => ASumPrecLR Discriminator (ParsecT e Text m) Parens where
       )
 
 instance ( HasF Parens g
-         , HasF TypeBool g
          , ForAllIn Functor g
          ) => Infer1 m (Molecule (VariantF g)) Parens where
     liftInferBody (Parens a) = do

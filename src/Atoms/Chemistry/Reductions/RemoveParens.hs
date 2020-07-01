@@ -3,8 +3,8 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Atoms.Chemistry.Reductions.RemoveParens where
 import Atoms.Elements.Parens
-import Atoms.Elements.Not
-import Atoms.Elements.Or
+import Atoms.Elements.FOL.Not
+import Atoms.Elements.FOL.Or
 import Atoms.Molecule.AST
 import Data.Type.Equality
 import Hyper

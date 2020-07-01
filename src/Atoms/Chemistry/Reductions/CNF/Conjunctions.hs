@@ -2,7 +2,7 @@
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Atoms.Chemistry.Reductions.CNF.Conjunctions where
-import Atoms.Elements.And
+import Atoms.Elements.FOL.And
 import Atoms.Elements.CNF.Conjunction
 import Atoms.Molecule.AST
 import Data.Type.Equality

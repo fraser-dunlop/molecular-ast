@@ -4,7 +4,7 @@
 module Atoms.Chemistry.Reductions.CNF.Literals where
 import Atoms.Elements.CNF.Literal
 import Atoms.Elements.Name
-import Atoms.Elements.Not
+import Atoms.Elements.FOL.Not
 import Atoms.Elements.Variable
 import Atoms.Molecule.AST
 import Atoms.Molecule.Pretty

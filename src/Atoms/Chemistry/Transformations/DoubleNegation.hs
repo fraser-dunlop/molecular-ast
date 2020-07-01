@@ -2,7 +2,7 @@
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Atoms.Chemistry.Transformations.DoubleNegation where
-import Atoms.Elements.Not
+import Atoms.Elements.FOL.Not
 import Atoms.Molecule.AST
 import Data.Type.Equality
 import Hyper

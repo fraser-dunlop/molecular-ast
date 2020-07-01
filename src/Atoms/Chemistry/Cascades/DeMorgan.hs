@@ -4,9 +4,6 @@
 module Atoms.Chemistry.Cascades.DeMorgan where
 import Atoms.Chemistry.Transformations.DeMorgan
 import Atoms.Chemistry.Utils.FixedPoint
-import Atoms.Elements.And
-import Atoms.Elements.Not
-import Atoms.Elements.Or
 import Atoms.Molecule.AST
 import Data.Type.Equality
 import Hyper
