@@ -61,3 +61,7 @@ instance ( HasF TypeBool g
     liftInferBody (LitBool b) = do
        newTerm (Molecule (toVariantF TypeBool)) <&> (Molecule (toVariantF (LitBool b)), ) . MkANode 
 
+iLitBool :: (HasF LitBool f, ForAllIn Functor f)
+     => Bool 
+     -> Pure # Molecule (VariantF f)
+iLitBool = Pure . Molecule . toVariantF . LitBool
