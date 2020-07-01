@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3f211af01433a6f4c3316da894bdd0ab78f51186ae571c64b3faf3841efe2663
+-- hash: a83620df489eaa8c43ea71220d7219ba229c4c445608684e57fb9785c7d17de0
 
 name:           molecular-ast
 version:        0.1.0.0
@@ -47,6 +47,7 @@ library
       Atoms.Chemistry.Transformations.DeMorgan
       Atoms.Chemistry.Transformations.DistributeOrsOverAnds
       Atoms.Chemistry.Transformations.DoubleNegation
+      Atoms.Chemistry.Transformations.FOL.LitBoolElimination
       Atoms.Chemistry.Utils.FixedPoint
       Atoms.Elements.CNF.Conjunction
       Atoms.Elements.CNF.Disjunction
