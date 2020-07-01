@@ -41,7 +41,7 @@ maybeInParens p = try (parens p) <|> p
 --         - match the Discriminator and parse empty on NotLeftRecursive
 --         - match the LeftRecursive Discriminator and
 --           - parse the left recursive branch by passing NotLeftRecursive to the sub-parser
---           - parse other recursive branches by passing LeftRecursive
+--           - parse other recursive branches by try NotLeftRecursive <|> LeftRecursive
 --   When writing a non left recursive parser fragment
 --         - ignore the Discriminator pass LeftRecursive to sub-parsers
 data Discriminator = LeftRecursive | NotLeftRecursive
@@ -71,6 +71,8 @@ instance ( Ord e
          , ASumPrecLR Discriminator (ParsecT e Text m) (VariantF g)
          , ForAllIn Functor g)
          => Parser (ParsecT e Text m) (Pure # Molecule (VariantF g)) where
-    parser d = Pure <$> parser d
+
+
+    parser d = Pure <$> parser d 
 
 

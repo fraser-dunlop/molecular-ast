@@ -29,6 +29,7 @@ import Type.Set
 import Type.Set.Variant
 import Type.Set.VariantF
 
+
 data IfAndOnlyIf h = IfAndOnlyIf h h  
   deriving (Eq, Ord, Show, Generic, Foldable, Traversable)
 
@@ -45,13 +46,13 @@ instance Pretty1 IfAndOnlyIf where
 
 
 instance (Ord e) => ASumPrecLR Discriminator (ParsecT e Text m) IfAndOnlyIf where
-    liftASumPrecLR NotLeftRecursive _ = (-100, empty) 
+    liftASumPrecLR NotLeftRecursive _ = ( minBound, empty ) 
     liftASumPrecLR LeftRecursive p =
       ( 420 
-      , try $ do
+      ,  try $ do
         l <- p NotLeftRecursive
         _ <- symbol "<->" 
-        r <- p LeftRecursive
+        r <- (try (p NotLeftRecursive)) <|> p LeftRecursive
         pure $ IfAndOnlyIf l r
       )
 

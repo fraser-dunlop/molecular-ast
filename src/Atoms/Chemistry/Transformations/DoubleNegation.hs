@@ -12,13 +12,21 @@ import Type.Set.VariantF
 import Data.STRef
 import Control.Monad.ST
 
-class DoubleNegation t where
+class ( HasF Not t
+      , ForAllIn Functor t
+      , ForAllIn Foldable t
+      , ForAllIn Traversable t
+      , Follow (Locate Not t) t ~ Not 
+      , FromSides (Locate Not t)
+      ) => DoubleNegation t where
     doubleNegation ::  STRef s Bool
                    -> VariantF t (Pure # Molecule (VariantF t))
                    -> ST s (Pure # Molecule (VariantF t))
 
 instance ( HasF Not t
          , ForAllIn Functor t
+         , ForAllIn Foldable t
+         , ForAllIn Traversable t
          , Follow (Locate Not t) t ~ Not 
          , FromSides (Locate Not t)
          ) => DoubleNegation t where

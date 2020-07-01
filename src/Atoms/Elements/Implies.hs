@@ -29,6 +29,7 @@ import Type.Set
 import Type.Set.Variant
 import Type.Set.VariantF
 
+
 data Implies h = Implies h h  
   deriving (Eq, Ord, Show, Generic, Foldable, Traversable)
 
@@ -45,13 +46,13 @@ instance Pretty1 Implies where
 
 
 instance (Ord e) => ASumPrecLR Discriminator (ParsecT e Text m) Implies where
-    liftASumPrecLR NotLeftRecursive _ = (-100, empty) 
+    liftASumPrecLR NotLeftRecursive _ = ( minBound, empty ) 
     liftASumPrecLR LeftRecursive p =
       ( 420 
       , try $ do
         l <- p NotLeftRecursive
         _ <- symbol "->" 
-        r <- p LeftRecursive
+        r <- (try (p NotLeftRecursive)) <|> p LeftRecursive
         pure $ Implies l r
       )
 

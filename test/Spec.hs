@@ -90,6 +90,8 @@ import Text.Megaparsec()
 import Data.Void
 import Data.Text (Text, pack)
 
+import System.IO (hFlush, stdout)
+
 
 type SimpleMoleculeP = (Insert Parens SimpleMolecule)
 
@@ -166,14 +168,14 @@ inferSimple :: Pure # (Molecule (VariantF SimplestMoleculeTypeable))
                  (Pure # Scheme (Types SimplestMoleculeTypeable) (TypeOf (Molecule (VariantF SimplestMoleculeTypeable)))) 
 inferSimple x = execPureInfer (withTestEnv id (inferExpr x)) 
 
-parseSomeMol :: Text -> Either (ParseErrorBundle Text Void) ((Molecule (VariantF SimpleMoleculeP)) # Pure) 
+parseSomeMol :: Text -> Either (ParseErrorBundle Text Void) (Pure # (Molecule (VariantF SimpleMoleculeP))) 
 parseSomeMol = runParser (parser LeftRecursive) "" 
 
 
 genTest :: IO (Pure # (Molecule (VariantF SimpleMoleculeGen)))
 genTest = do
    gend <- genTimeLimited gen 1000 
-   if length (Pretty.render (pPrint gend)) < 20
+   if length (Pretty.render (pPrint gend)) < 40
       then genTest
       else return gend
 
@@ -193,7 +195,7 @@ reduction molecule =
 
 main :: IO ()
 main = do
-    void $ sequence $ replicate 10 $ do
+    void $ sequence $ replicate 1000 $ do
         putStrLn "random generating"
         gend <- genTest     
         print $ pPrint gend
@@ -203,7 +205,7 @@ main = do
              Right q -> do
                 -- TODO implement equality on Molecules
                 -- p should equal gend since we parse Parens added by pretty printing then remove them 
-                let (c,p) = removeParens (Pure q)  
+                let (c,p) = removeParens q  
                 putStrLn $ "removeParens " ++ show c
                 print $ pPrint p
                 putStrLn "deMorganNegationOfConjunctionFixed"
@@ -237,7 +239,7 @@ main = do
 --                let p7 = foldMolecule doubleNegation $ snd p6 
 --                print $ pPrint p7
 
-                let (ch, p8 :: Pure # Molecule (VariantF SimplerMolecule)) = reduction (Pure q) 
+                let (ch, p8 :: Pure # Molecule (VariantF SimplerMolecule)) = reduction q 
                 putStrLn $ "reduction " ++ show ch
                 print $ pPrint p8
 
@@ -247,7 +249,7 @@ main = do
                 print $ pPrint p9
 
 
-                let (ch2, p10 :: Pure # Molecule (VariantF SimplestMolecule)) = exampleTelescope (Pure q) 
+                let (ch2, p10 :: Pure # Molecule (VariantF SimplestMolecule)) = exampleTelescope q 
                 putStrLn $ "exampleTelescope " ++ show ch2
                 print $ pPrint p10
 
@@ -255,17 +257,18 @@ main = do
                 let p11 :: Pure # Molecule (VariantF SimplestMoleculeTypeable) =
                          dilute (Proxy @Type) $ dilute (Proxy @TypeBool) p10
 
-                case inferSimple p11 of
-
-                    Left typerr -> print $ "inference failed: " ++ (Pretty.render (pPrint typerr))
-                    Right inferred -> print $ "inference success: " ++ (Pretty.render (pPrint inferred))
+--                case inferSimple p11 of
+--
+--                    Left typerr -> print $ "inference failed: " ++ (Pretty.render (pPrint typerr))
+--                    Right inferred -> print $ "inference success: " ++ (Pretty.render (pPrint inferred))
 
 
             
-                case transformToCheckableCNFSimple p9 of
-                    Left typerr -> print $ "CNF inference failed: " ++ (Pretty.render (pPrint typerr))
-                    Right (_, inferred) -> print $ "CNF inference success: " ++ (Pretty.render (pPrint inferred))
+                case transformToCheckableCNFSimple p10 of
+                    Left typerr -> putStrLn $ "CNF inference failed: " ++ (Pretty.render (pPrint typerr))
+                    Right (_, inferred) -> putStrLn $ "CNF inference success: " ++ (Pretty.render (pPrint inferred))
 
                 putStrLn ""
+                hFlush stdout
 
 

@@ -44,13 +44,13 @@ instance Pretty1 Or where
 
 
 instance (Ord e) => ASumPrecLR Discriminator (ParsecT e Text m) Or where
-    liftASumPrecLR NotLeftRecursive p = (100, empty)
+    liftASumPrecLR NotLeftRecursive p = ( minBound, empty )
     liftASumPrecLR LeftRecursive p =
-      ( 420 
+      ( (420 :: Int) 
       , try $ do
         l <- p NotLeftRecursive
         _ <- symbol "\\/" 
-        r <- p LeftRecursive
+        r <- (try (p NotLeftRecursive)) <|> p LeftRecursive
         pure $ Or l r
       )
 

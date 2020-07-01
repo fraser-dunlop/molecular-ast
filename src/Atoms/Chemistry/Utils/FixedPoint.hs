@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleContexts     #-}
 module Atoms.Chemistry.Utils.FixedPoint
     ( fixedPointCounted
+    , fixedPointLoop
     ) where
 import Atoms.Molecule.AST
 import Hyper
@@ -43,4 +44,24 @@ fixedPointCounted transformation molecule =
         count <- (,) <$> readSTRef changed <*> readSTRef counter
         pure (count, transformed)
  
+fixedPointLoop :: forall g . (ForAllIn Functor g, ForAllIn Foldable g, ForAllIn Traversable g)
+               => [(Pure # Molecule (VariantF g))
+                   -> ((Bool, Int), Pure # Molecule (VariantF g))]
+               -> Pure # Molecule (VariantF g)
+               -> Pure # Molecule (VariantF g)
+fixedPointLoop transformations molecule =
+    let (t, m) = sequr 0 transformations molecule
+     in if t > length transformations
+          then fixedPointLoop transformations m
+          else m
+   where
+        sequr :: Int
+             -> [(Pure # Molecule (VariantF g)) -> ((Bool, Int), Pure # Molecule (VariantF g))]
+             -> (Pure # Molecule (VariantF g))
+             -> (Int, (Pure # Molecule (VariantF g)))
+        sequr i [] x = (i, x)
+        sequr i (t:ts) x =
+           let ((_, j), m) = t x
+              in sequr (i + j) ts m
+      
 

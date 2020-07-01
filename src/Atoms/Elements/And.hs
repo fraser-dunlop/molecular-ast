@@ -30,6 +30,7 @@ import Type.Set
 import Type.Set.Variant
 import Type.Set.VariantF
 
+
 data And h = And h h  
   deriving (Eq, Ord, Show, Generic, Foldable, Traversable)
 
@@ -46,13 +47,13 @@ instance Pretty1 And where
 
 
 instance (Ord e) => ASumPrecLR Discriminator (ParsecT e Text m) And where
-    liftASumPrecLR NotLeftRecursive _ = (-100, empty) 
+    liftASumPrecLR NotLeftRecursive _ = ( minBound, empty )
     liftASumPrecLR LeftRecursive p =
       ( 420 
       , try $ do
         l <- p NotLeftRecursive
         _ <- symbol "/\\" 
-        r <- p LeftRecursive
+        r <- (try (p NotLeftRecursive)) <|> p LeftRecursive
         pure $ And l r
       )
 

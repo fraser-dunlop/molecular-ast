@@ -47,8 +47,10 @@ instance (Ord e) => ASumPrecLR Discriminator (ParsecT e Text m) Not where
     liftASumPrecLR _ p =
       ( 420 
       , try $ do
-        _ <- symbol "!"  --will this parse !z and ! z? 
+        _ <- symbol "!" 
         r <- p LeftRecursive
+--        r <- (try (p NotLeftRecursive)) <|> p LeftRecursive
+
         pure $ Not r
       )
 
