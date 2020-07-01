@@ -94,6 +94,12 @@ import Data.Text (Text, pack)
 type SimpleMoleculeP = (Insert Parens SimpleMolecule)
 
 
+type SimpleMoleculeGen = (Insert Implies 
+                         (Insert IfAndOnlyIf
+                         (Insert Variable 
+                         (Insert Not
+                         (Insert Or 
+                         (Insert And 'Empty))))))
 
 
 type SimpleMolecule = (Insert Implies SimplerMolecule)
@@ -108,12 +114,13 @@ type SimplestMolecule = (Insert Variable
 
 
 
-type CNFCore = --(Insert TypeLiteral    --including these causes a memory explosion on compilation!!! what!?
-               --(Insert TypeDisjunction
-               --(Insert TypeConjunction
+
+type CNFCore = (Insert TypeLiteral    --including these causes a memory explosion on compilation!!! what!?
+               (Insert TypeDisjunction
+               (Insert TypeConjunction
                (Insert Conjunction 
                (Insert Disjunction
-               (Insert Literal ('Empty)))) --)))
+               (Insert Literal ('Empty)))))))
 
 type SimplestMoleculeTypeable =  (Insert Type 
                                  (Insert TypeBool SimplestMolecule))
@@ -154,16 +161,16 @@ transformToCheckableCNFSimple x = transformToCheckableCNF x
 
   
 
---inferSimple :: Pure # (Molecule (VariantF SimplestMoleculeTypeable))
---       -> Either (TypeError SimplestMoleculeTypeable # Pure)
---                 (Pure # Scheme (Types SimplestMoleculeTypeable) (TypeOf (Molecule (VariantF SimplestMoleculeTypeable)))) 
---inferSimple x = execPureInfer (withTestEnv id (inferExpr x)) 
+inferSimple :: Pure # (Molecule (VariantF SimplestMoleculeTypeable))
+       -> Either (TypeError SimplestMoleculeTypeable # Pure)
+                 (Pure # Scheme (Types SimplestMoleculeTypeable) (TypeOf (Molecule (VariantF SimplestMoleculeTypeable)))) 
+inferSimple x = execPureInfer (withTestEnv id (inferExpr x)) 
 
 parseSomeMol :: Text -> Either (ParseErrorBundle Text Void) ((Molecule (VariantF SimpleMoleculeP)) # Pure) 
 parseSomeMol = runParser (parser LeftRecursive) "" 
 
 
-genTest :: IO (Pure # (Molecule (VariantF SimpleMolecule)))
+genTest :: IO (Pure # (Molecule (VariantF SimpleMoleculeGen)))
 genTest = do
    gend <- genTimeLimited gen 1000 
    if length (Pretty.render (pPrint gend)) < 20
@@ -213,22 +220,22 @@ main = do
                 putStrLn $ "eliminateImplies " ++ show c3
                 print $ pPrint p3
 
-                putStrLn "doubleNegation"
-                let p4 = foldMolecule doubleNegation p3 
-                print $ pPrint p4
+--                putStrLn "doubleNegation"
+--                let p4 = foldMolecule doubleNegation p3 
+--                print $ pPrint p4
+--
+--                putStrLn "deMorganNegationOfConjunctionFixed"
+--                let p5 = deMorganNegationOfConjunctionFixed p4 
+--                print $ fst p5
+--                print $ pPrint $ snd p5
+--                putStrLn "deMorganNegationOfDisjunctionFixed"
+--                let p6 = deMorganNegationOfDisjunctionFixed $ snd p5
+--                print $ fst p6
+--                print $ pPrint $ snd p6
 
-                putStrLn "deMorganNegationOfConjunctionFixed"
-                let p5 = deMorganNegationOfConjunctionFixed p4 
-                print $ fst p5
-                print $ pPrint $ snd p5
-                putStrLn "deMorganNegationOfDisjunctionFixed"
-                let p6 = deMorganNegationOfDisjunctionFixed $ snd p5
-                print $ fst p6
-                print $ pPrint $ snd p6
-
-                putStrLn "doubleNegation"
-                let p7 = foldMolecule doubleNegation $ snd p6 
-                print $ pPrint p7
+--                putStrLn "doubleNegation"
+--                let p7 = foldMolecule doubleNegation $ snd p6 
+--                print $ pPrint p7
 
                 let (ch, p8 :: Pure # Molecule (VariantF SimplerMolecule)) = reduction (Pure q) 
                 putStrLn $ "reduction " ++ show ch
@@ -240,18 +247,20 @@ main = do
                 print $ pPrint p9
 
 
-                let (ch2, p10 :: Pure # Molecule (VariantF SimplerMolecule)) = exampleTelescope (Pure q) 
+                let (ch2, p10 :: Pure # Molecule (VariantF SimplestMolecule)) = exampleTelescope (Pure q) 
                 putStrLn $ "exampleTelescope " ++ show ch2
                 print $ pPrint p10
 
 
                 let p11 :: Pure # Molecule (VariantF SimplestMoleculeTypeable) =
-                         dilute (Proxy @Type) $ dilute (Proxy @TypeBool) p9
+                         dilute (Proxy @Type) $ dilute (Proxy @TypeBool) p10
 
---                case inferSimple p11 of
---                    Left typerr -> print $ "inference failed: " ++ (Pretty.render (pPrint typerr))
---                    Right inferred -> print $ "inference success: " ++ (Pretty.render (pPrint inferred))
---
+                case inferSimple p11 of
+
+                    Left typerr -> print $ "inference failed: " ++ (Pretty.render (pPrint typerr))
+                    Right inferred -> print $ "inference success: " ++ (Pretty.render (pPrint inferred))
+
+
             
                 case transformToCheckableCNFSimple p9 of
                     Left typerr -> print $ "CNF inference failed: " ++ (Pretty.render (pPrint typerr))

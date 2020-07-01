@@ -42,12 +42,12 @@ instance Pretty1 TypeDisjunction where
     liftPrintPrec _ _ _ _ TypeDisjunction = Pretty.text "TypeDisjunction"
 
 instance (Ord e) => ASumPrecLR Discriminator (ParsecT e Text m) TypeDisjunction where
-    liftASumPrecLR _ p =
-      ( -188
-      , try $ do
-          _ <- symbol "TypeDisjunction"
-          pure TypeDisjunction
-      )
+    liftASumPrecLR _ p = ( minBound, empty )
+--      ( -188
+--      , try $ do
+--          _ <- symbol "TypeDisjunction"
+--          pure TypeDisjunction
+--      )
 
 instance ( HasF Type g
          , HasF TypeDisjunction g

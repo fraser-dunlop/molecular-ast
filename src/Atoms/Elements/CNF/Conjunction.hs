@@ -50,14 +50,14 @@ instance Pretty1 Conjunction where
 
 instance (Ord e) => ASumPrecLR Discriminator (ParsecT e Text m) Conjunction where
     liftASumPrecLR NotLeftRecursive p = (100, empty)
-    liftASumPrecLR LeftRecursive p =
-      ( -499 
-      , try $ do
-        l <- p NotLeftRecursive
-        _ <- symbol "\\/" 
-        r <- p LeftRecursive
-        pure $ Conjunction l r
-      )
+    liftASumPrecLR LeftRecursive p = ( minBound, empty )
+--      ( -499 
+--      , try $ do
+--        l <- p NotLeftRecursive
+--        _ <- symbol "\\/" 
+--        r <- p LeftRecursive
+--        pure $ Conjunction l r
+--      )
 
 instance ( HasF Conjunction g
          , HasF TypeLiteral g

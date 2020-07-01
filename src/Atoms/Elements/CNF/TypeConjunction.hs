@@ -42,12 +42,12 @@ instance Pretty1 TypeConjunction where
     liftPrintPrec _ _ _ _ TypeConjunction = Pretty.text "TypeConjunction"
 
 instance (Ord e) => ASumPrecLR Discriminator (ParsecT e Text m) TypeConjunction where
-    liftASumPrecLR _ p =
-      ( -188
-      , try $ do
-          _ <- symbol "TypeConjunction"
-          pure TypeConjunction
-      )
+    liftASumPrecLR _ p = ( minBound, empty )
+--      ( -188
+--      , try $ do
+--          _ <- symbol "TypeConjunction"
+--          pure TypeConjunction
+--      )
 
 instance ( HasF Type g
          , HasF TypeConjunction g

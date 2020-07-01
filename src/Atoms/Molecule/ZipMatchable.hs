@@ -36,17 +36,6 @@ instance ( ForAllIn (ZipMatchable1 g) g
                 Dict -> VariantF ssl <$> zipJoin1 l r 
          Nothing -> Nothing
 
-class ZipMatch1 h where
-    zipMatch1 :: forall p q . 
-                 h # p
-              -> h # q
-              -> Maybe (h # (p :*: q)) 
-
-instance ZipMatchable g => ZipMatch1 (Molecule (VariantF g)) where
-    zipMatch1 (Molecule l) (Molecule r) = Molecule <$> zipJoin l r
-
--- | this doesn't zipMatch recursively
--- can we htraverse on HWitness (Molecule (VariantF g)) and apply zipMatch1?
 instance ( ZipMatchable g
          ) => ZipMatch (Molecule (VariantF g)) where
     zipMatch (Molecule l) (Molecule r) = Molecule <$> (zipJoin l r)

@@ -9,17 +9,20 @@ import Hyper
 import Type.Set
 import Type.Set.Variant
 import Type.Set.VariantF
+import Data.STRef
+import Control.Monad.ST
 
 class DoubleNegation t where
-    doubleNegation :: VariantF t (Pure # Molecule (VariantF t))
-                   -> Pure # Molecule (VariantF t)
+    doubleNegation ::  STRef s Bool
+                   -> VariantF t (Pure # Molecule (VariantF t))
+                   -> ST s (Pure # Molecule (VariantF t))
 
 instance ( HasF Not t
          , ForAllIn Functor t
          , Follow (Locate Not t) t ~ Not 
          , FromSides (Locate Not t)
          ) => DoubleNegation t where
-    doubleNegation (VariantF (tag :: SSide ss) res) =
+    doubleNegation changed (VariantF (tag :: SSide ss) res) =
         case testEquality tag (fromSides @(Locate Not t)) of
             Just Refl ->
                 case res of
@@ -27,7 +30,9 @@ instance ( HasF Not t
                         case testEquality tagi (fromSides @(Locate Not t)) of
                             Just Refl ->
                                case resi of
-                                  Not a -> a 
-                            Nothing -> Pure $ Molecule (VariantF tag res) 
-            Nothing -> Pure $ Molecule (VariantF tag res)
+                                  Not a -> do
+                                     writeSTRef changed True
+                                     pure a 
+                            Nothing -> pure $ Pure $ Molecule (VariantF tag res) 
+            Nothing -> pure $ Pure $ Molecule (VariantF tag res)
 

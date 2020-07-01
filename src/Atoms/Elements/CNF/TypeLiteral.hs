@@ -42,12 +42,12 @@ instance Pretty1 TypeLiteral where
     liftPrintPrec _ _ _ _ TypeLiteral = Pretty.text "TypeLiteral"
 
 instance (Ord e) => ASumPrecLR Discriminator (ParsecT e Text m) TypeLiteral where
-    liftASumPrecLR _ p =
-      ( -188
-      , try $ do
-          _ <- symbol "TypeLiteral"
-          pure TypeLiteral
-      )
+    liftASumPrecLR _ p = ( minBound, empty )
+--      ( -188
+--      , try $ do
+--          _ <- symbol "TypeLiteral"
+--          pure TypeLiteral
+--      )
 
 instance ( HasF Type g
          , HasF TypeLiteral g
