@@ -50,7 +50,7 @@ instance Pretty1 Disjunction where
 instance (Ord e) => ASumPrecLR Discriminator (ParsecT e Text m) Disjunction where
     liftASumPrecLR NotLeftRecursive p = (100, empty)
     liftASumPrecLR LeftRecursive p =
-      ( 420 
+      ( -419 
       , try $ do
         l <- p NotLeftRecursive
         _ <- symbol "\\/" 

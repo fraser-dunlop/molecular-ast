@@ -15,6 +15,7 @@ import Control.Monad.Except
 
 
 -- This throws an exception when we reach the node to be extracted 
+-- in general it would be more sensible to do this in the State monad
 class ( HasF FlatConjunction f
       , ForAllIn Functor f
       , ForAllIn Foldable f
@@ -42,6 +43,7 @@ instance ( HasF FlatConjunction f
 
 
 -- This transforms the exception since the exception is expected
+-- if there is no exception that becomes the exception
 class ( HasF FlatConjunction f
       , ForAllIn Functor f
       , ForAllIn Foldable f

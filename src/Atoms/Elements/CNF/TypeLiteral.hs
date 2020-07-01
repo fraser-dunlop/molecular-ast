@@ -43,7 +43,7 @@ instance Pretty1 TypeLiteral where
 
 instance (Ord e) => ASumPrecLR Discriminator (ParsecT e Text m) TypeLiteral where
     liftASumPrecLR _ p =
-      ( 188
+      ( -188
       , try $ do
           _ <- symbol "TypeLiteral"
           pure TypeLiteral

@@ -43,7 +43,7 @@ instance Pretty1 TypeDisjunction where
 
 instance (Ord e) => ASumPrecLR Discriminator (ParsecT e Text m) TypeDisjunction where
     liftASumPrecLR _ p =
-      ( 188
+      ( -188
       , try $ do
           _ <- symbol "TypeDisjunction"
           pure TypeDisjunction

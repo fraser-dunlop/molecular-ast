@@ -43,7 +43,7 @@ instance Pretty1 TypeConjunction where
 
 instance (Ord e) => ASumPrecLR Discriminator (ParsecT e Text m) TypeConjunction where
     liftASumPrecLR _ p =
-      ( 188
+      ( -188
       , try $ do
           _ <- symbol "TypeConjunction"
           pure TypeConjunction

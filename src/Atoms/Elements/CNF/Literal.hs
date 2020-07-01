@@ -71,7 +71,7 @@ instance Pretty1 Literal where
 -- | This is a reduction target and not intended to be parsed
 instance (Ord e) => ASumPrecLR Discriminator (ParsecT e Text m) Literal where
     liftASumPrecLR _ p =
-      ( 0
+      ( -101
       , ( try $ do
           _ <- symbol "!"
           Negative . Name <$> lexeme ((:) <$> letterChar <*> many alphaNumChar <?> "Variable")

@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleContexts, BlockArguments, OverloadedStrings #-}
-{-# OPTIONS_GHC -fplugin=Type.Compare.Plugin -fconstraint-solver-iterations=1000 -freduction-depth=0 #-}
+{-# OPTIONS_GHC -fplugin=Type.Compare.Plugin -fconstraint-solver-iterations=1000 -freduction-depth=10000 #-}
 import qualified Control.Lens as Lens
 import           Control.Lens.Operators
 import           Control.Monad.Except
@@ -42,17 +42,17 @@ import Atoms.Molecule.Parser
 import Atoms.Molecule.Pretty
 import Atoms.Molecule.Gen
 import Atoms.Molecule.PureInfer
-import Atoms.Molecule.HasInferredType
-import Atoms.Molecule.HasTypeConstraints
-import Atoms.Molecule.VarType
+import Atoms.Molecule.HasInferredType()
+import Atoms.Molecule.HasTypeConstraints()
+import Atoms.Molecule.VarType()
 
 
-import Atoms.Molecule.Infer
-import Atoms.Molecule.Infer1
-import Atoms.Molecule.InferOf
+import Atoms.Molecule.Infer()
+import Atoms.Molecule.Infer1()
+import Atoms.Molecule.InferOf()
 import Atoms.Molecule.InferScope
-import Atoms.Molecule.RTraversable
-import Atoms.Molecule.RTraversableInferOf
+import Atoms.Molecule.RTraversable()
+import Atoms.Molecule.RTraversableInferOf()
 import Atoms.Molecule.Types
 import Atoms.Molecule.ScopeTypes
 
@@ -66,88 +66,98 @@ import Atoms.Chemistry.Transformations.DeMorgan
 import Atoms.Chemistry.Transformations.DoubleNegation
 import Atoms.Chemistry.Telescopes.Example
 import Atoms.Chemistry.Dilution
+import Atoms.Chemistry.Concentration
 
-import Data.Proxy
 
-import Hyper.Unify.New
-import Hyper.Unify.Generalize
+import Atoms.Elements.CNF.TypeDisjunction
+import Atoms.Elements.CNF.TypeConjunction
+import Atoms.Elements.CNF.TypeLiteral
+import Atoms.Elements.CNF.Literal
+import Atoms.Elements.CNF.Disjunction
+import Atoms.Elements.CNF.Conjunction
+import Atoms.Chemistry.Reductions.CNF.Literals
+import Atoms.Chemistry.Telescopes.CNF.Checkable
 
-import qualified Data.Map as Map
 
-import Text.Megaparsec
+import Data.Proxy()
+
+import Hyper.Unify.New()
+import Hyper.Unify.Generalize()
+
+import qualified Data.Map as Map()
+
+import Text.Megaparsec()
 import Data.Void
 import Data.Text (Text, pack)
 
 
-type SimpleMoleculeP = (Insert Parens
-                       (Insert Implies
-                       (Insert IfAndOnlyIf
-                       (Insert And 
-                       (Insert Or
-                       (Insert Not
-                       (Insert Variable ('Empty))))))))
+type SimpleMoleculeP = (Insert Parens SimpleMolecule)
 
 
 
 
-type SimpleMolecule = (Insert Implies
-                      (Insert IfAndOnlyIf
-                      (Insert And 
-                      (Insert Or
-                      (Insert Not
-                      (Insert Variable ('Empty)))))))
+type SimpleMolecule = (Insert Implies SimplerMolecule)
 
-type SimplerMolecule = (Insert IfAndOnlyIf
-                       (Insert And 
-                       (Insert Or
-                       (Insert Not
-                       (Insert Variable ('Empty))))))
+type SimplerMolecule = (Insert IfAndOnlyIf SimplestMolecule) 
 
 
-type SimplestMolecule = (Insert And 
-                        (Insert Or
+type SimplestMolecule = (Insert Variable 
                         (Insert Not
-                        (Insert Variable ('Empty)))))
+                        (Insert Or 
+                        (Insert And (CNFCore)))))
 
-type SimplestMoleculeTypeable =  (Insert Type (Insert TypeBool (Insert And 
-                                 (Insert Or
-                                 (Insert Not
-                                 (Insert Variable ('Empty)))))))
+
+
+type CNFCore = --(Insert TypeLiteral    --including these causes a memory explosion on compilation!!! what!?
+               --(Insert TypeDisjunction
+               --(Insert TypeConjunction
+               (Insert Conjunction 
+               (Insert Disjunction
+               (Insert Literal ('Empty)))) --)))
+
+type SimplestMoleculeTypeable =  (Insert Type 
+                                 (Insert TypeBool SimplestMolecule))
 
 
 withTestEnv :: forall g m env a.
     ( HasF TypeBool g
-    , HasF Type g
     , ForAllIn Functor g
     , UnifyGen m (Molecule (VariantF g)), MonadReader env m
-    , HasScheme (Types g) m (Molecule (VariantF g))
     ) =>
     Lens.LensLike' Lens.Identity env (InferScope g (UVarOf m)) -> m a -> m a
 withTestEnv l act = local (l %~ testEnv) act 
    where testEnv :: InferScope g (UVarOf m) -> InferScope g (UVarOf m)
          testEnv e = e { _varSchemes = ScopeTypes boolAlphabet } 
          boolAlphabet :: Map.Map Name (HFlip GTerm (Molecule (VariantF g)) # (UVarOf m)) 
-         boolAlphabet = Map.fromList $ (zip (Name <$> ((:"") <$> ['c'..'v']))
+         boolAlphabet = Map.fromList $ (zip (Name <$> ((:"") <$> ['a'..'z']))
                                             (cycle [MkHFlip (GBody (Molecule (toVariantF TypeBool)))]))
-                                    ++ (zip (Name <$> ((:"") <$> ['w'..'x']))
-                                            (cycle [MkHFlip (GBody (Molecule (toVariantF (Type 1))))]))
-                                    ++ (zip (Name <$> ((:"") <$> ['y'..'z']))
-                                            (cycle [MkHFlip (GBody (Molecule (toVariantF (Type 0))))]))
 
          
---    do
---        let boolType = (Molecule (toVariantF TypeBool))	
---        local (l %~ addEnv boolType) act
---        where addEnv :: _
-----              addEnv = undefined
---              addEnv b x = sequence ((\nm -> x & varSchemes . _ScopeTypes . Lens.at nm ?~ b) <$> ((((:"") <$> ['a'..'z']))))
+withCNFTestEnv :: forall g m env a.
+    ( HasF TypeLiteral g
+    , ForAllIn Functor g
+    , UnifyGen m (Molecule (VariantF g)), MonadReader env m
+    ) =>
+    Lens.LensLike' Lens.Identity env (InferScope g (UVarOf m)) -> m a -> m a
+withCNFTestEnv l act = local (l %~ testEnv) act 
+   where testEnv :: InferScope g (UVarOf m) -> InferScope g (UVarOf m)
+         testEnv e = e { _varSchemes = ScopeTypes boolAlphabet } 
+         boolAlphabet :: Map.Map Name (HFlip GTerm (Molecule (VariantF g)) # (UVarOf m)) 
+         boolAlphabet = Map.fromList $ (zip (Name <$> ((:"") <$> ['a'..'z']))
+                                            (cycle [MkHFlip (GBody (Molecule (toVariantF TypeLiteral)))]))
 
+ 
 
+transformToCheckableCNFSimple :: MonadError String m => Pure # (Molecule (VariantF SimplestMolecule))
+                                                     -> m (Bool, (Pure # Molecule (VariantF CNFCore)))
+transformToCheckableCNFSimple x = transformToCheckableCNF x
 
-inferSimple :: Pure # (Molecule (VariantF SimplestMoleculeTypeable))
-       -> Either (TypeError SimplestMoleculeTypeable # Pure)
-                 (Pure # Scheme (Types SimplestMoleculeTypeable) (TypeOf (Molecule (VariantF SimplestMoleculeTypeable)))) 
-inferSimple x = execPureInfer (withTestEnv id (inferExpr x))
+  
+
+--inferSimple :: Pure # (Molecule (VariantF SimplestMoleculeTypeable))
+--       -> Either (TypeError SimplestMoleculeTypeable # Pure)
+--                 (Pure # Scheme (Types SimplestMoleculeTypeable) (TypeOf (Molecule (VariantF SimplestMoleculeTypeable)))) 
+--inferSimple x = execPureInfer (withTestEnv id (inferExpr x)) 
 
 parseSomeMol :: Text -> Either (ParseErrorBundle Text Void) ((Molecule (VariantF SimpleMoleculeP)) # Pure) 
 parseSomeMol = runParser (parser LeftRecursive) "" 
@@ -225,29 +235,27 @@ main = do
                 print $ pPrint p8
 
 
-                let (ch, p9 :: Pure # Molecule (VariantF SimplestMolecule)) = eliminateIfAndOnlyIf p8 
-                putStrLn $ "exampleIfAndOnlyIf " ++ show ch
+                let (ch1, p9 :: Pure # Molecule (VariantF SimplestMolecule)) = eliminateIfAndOnlyIf p8 
+                putStrLn $ "exampleIfAndOnlyIf " ++ show ch1
                 print $ pPrint p9
 
 
-                let (ch, p10 :: Pure # Molecule (VariantF SimplerMolecule)) = exampleTelescope (Pure q) 
-                putStrLn $ "exampleTelescope " ++ show ch
+                let (ch2, p10 :: Pure # Molecule (VariantF SimplerMolecule)) = exampleTelescope (Pure q) 
+                putStrLn $ "exampleTelescope " ++ show ch2
                 print $ pPrint p10
 
 
                 let p11 :: Pure # Molecule (VariantF SimplestMoleculeTypeable) =
                          dilute (Proxy @Type) $ dilute (Proxy @TypeBool) p9
 
--- | type checks okay but crashes at runtime with when variables are not in scope
--- molecular-ast-test-exe: (^?!): empty Fold
--- CallStack (from HasCallStack):
---  error, called at src/Control/Lens/Fold.hs:1310:28 in lens-4.18.1-44tD1ZSGzOC7tE3w8F9M7F:Control.Lens.Fold
---  ^?!, called at src/Atoms/Molecule/VarType.hs:31:17 in molecular-ast-0.1.0.0-Es4X0GdIAVP4ZqpZAKnG0E:Atoms.Molecule.VarType
-                case inferSimple p11 of
-                    Left typerr -> print $ "inference failed: " ++ (Pretty.render (pPrint typerr))
-                    Right inferred -> print $ "inference success: " ++ (Pretty.render (pPrint inferred))
-
+--                case inferSimple p11 of
+--                    Left typerr -> print $ "inference failed: " ++ (Pretty.render (pPrint typerr))
+--                    Right inferred -> print $ "inference success: " ++ (Pretty.render (pPrint inferred))
+--
             
+                case transformToCheckableCNFSimple p9 of
+                    Left typerr -> print $ "CNF inference failed: " ++ (Pretty.render (pPrint typerr))
+                    Right (_, inferred) -> print $ "CNF inference success: " ++ (Pretty.render (pPrint inferred))
 
                 putStrLn ""
 
