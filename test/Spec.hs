@@ -28,6 +28,7 @@ import Type.Set.Variant
 import Type.Set.VariantF
 import Atoms.Elements.Generic.Type
 import Atoms.Elements.FOL.TypeBool
+import Atoms.Elements.FOL.LitBool
 import Atoms.Elements.FOL.And
 import Atoms.Elements.FOL.Or
 import Atoms.Elements.FOL.Not
@@ -129,9 +130,9 @@ type CNFCore = (Insert Type
                (Insert TypeConjunction
                (Insert Conjunction 
                (Insert Disjunction
-               (Insert Literal (Insert Variable ('Empty)))))))))
+               (Insert Literal (Insert LitBool (Insert TypeBool (Insert Variable ('Empty)))))))))))
 
-type SimplestMoleculeTypeable =  (Insert TypeBool SimplestMolecule)
+type SimplestMoleculeTypeable =  SimplestMolecule
 
 
 withTestEnv :: forall g m env a.
@@ -185,7 +186,7 @@ parseSomeMol = runParser (parser LeftRecursive) ""
 genTest :: IO (Pure # (Molecule (VariantF SimpleMoleculeGen)))
 genTest = do
    gend <- genTimeLimited gen 10
-   if length (Pretty.render (pPrint gend)) < 10 || length (Pretty.render (pPrint gend)) > 20
+   if length (Pretty.render (pPrint gend)) < 20 || length (Pretty.render (pPrint gend)) > 40
       then genTest
       else return gend
 
@@ -263,7 +264,7 @@ main = do
 
                 let (ch2, p10 :: Pure # Molecule (VariantF SimplestMolecule)) = exampleTelescope q 
                 putStrLn $ "exampleTelescope " ++ show ch2
---                print $ pPrint p10
+                print $ pPrint p10
                 hFlush stdout
 
 

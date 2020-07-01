@@ -1,13 +1,16 @@
+{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Atoms.Elements.FOL.LitBool where
 import Atoms.Elements.FOL.TypeBool
 import Atoms.Molecule.AST
+import Atoms.Molecule.HasTypeConstraints
 import Atoms.Molecule.Infer1
 import Atoms.Molecule.ScopeTypes
 import Atoms.Molecule.Parser
 import Atoms.Molecule.Pretty
+import Atoms.Molecule.ZipMatchable
 import Control.Lens.Operators
 import Control.Lens.Prism
 import Data.Text (Text, pack)
@@ -26,7 +29,8 @@ import Type.Set.Variant
 import Type.Set.VariantF
 
 data LitBool h = LitBool Bool 
-  deriving (Eq, Ord, Show, Generic, Generic1)
+  deriving (Eq, Ord, Show, Generic, Generic1, Foldable, Traversable)
+
 
 
 instance Functor LitBool where
@@ -40,8 +44,8 @@ instance Pretty1 LitBool where
     liftPrintPrec _ _ _ _ (LitBool True) = Pretty.text "True"
     liftPrintPrec _ _ _ _ (LitBool False) = Pretty.text "False"
 
-instance (Ord e) => ASumPrec1 (ParsecT e Text m) LitBool where
-    liftASumPrec p =
+instance (Ord e) => ASumPrecLR Discriminator (ParsecT e Text m) LitBool where
+    liftASumPrecLR _ p =
       ( 42
       , (do
           _ <- symbol "True"
@@ -60,6 +64,16 @@ instance ( HasF TypeBool g
          ) => Infer1 m (Molecule (VariantF g)) LitBool where
     liftInferBody (LitBool b) = do
        newTerm (Molecule (toVariantF TypeBool)) <&> (Molecule (toVariantF (LitBool b)), ) . MkANode 
+
+
+instance HasTypeConstraints1 g LitBool where 
+   verifyConstraints1 _ _ = Nothing
+
+
+instance ZipMatchable1 g LitBool where
+   zipJoin1 (LitBool l) (LitBool r) = if l == r then Just (LitBool l) else Nothing 
+
+
 
 iLitBool :: (HasF LitBool f, ForAllIn Functor f)
      => Bool 

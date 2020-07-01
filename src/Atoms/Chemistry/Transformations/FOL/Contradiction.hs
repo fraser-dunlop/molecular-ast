@@ -37,7 +37,7 @@ class ( HasF And t
       , Follow (Locate Variable t) t ~ Variable
       , FromSides (Locate Variable t)
       ) => Contradiction t where
-    tautologyElimination ::  STRef s Bool
+    contradictionElimination ::  STRef s Bool
                          -> VariantF t (Pure # Molecule (VariantF t))
                          -> ST s (Pure # Molecule (VariantF t))
 
@@ -57,7 +57,7 @@ instance ( HasF And t
          , Follow (Locate Variable t) t ~ Variable
          , FromSides (Locate Variable t)
          ) => Contradiction t where
-    tautologyElimination changed v@(VariantF tag res) =
+    contradictionElimination changed v@(VariantF tag res) =
         case testEquality tag (fromSides @(Locate And t)) of
           Just Refl ->
             case res of
