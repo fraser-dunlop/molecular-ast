@@ -46,6 +46,16 @@ maybeInParens p = try (parens p) <|> p
 --         - ignore the Discriminator pass LeftRecursive to sub-parsers
 data Discriminator = LeftRecursive | NotLeftRecursive
 
+-- | This is super inefficient especially with big left recursive terms
+-- propose something more powerful that liftASumPrecLR
+--   - liftParser
+--   - use Control.Monad.Combinators.Expr in VariantF liftParser
+--   - liftParser can then return a structure encoding how to parse
+--   the term e.g. PInfixL (m f) where f is the functor being parsed 
+--   the liftParser implementation can collect these implementations
+--   from the Atoms and build an expression parser from them
+--   that is more efficient than this.
+--
 
 -- | Things that can be parsed
 class Parser m a where
