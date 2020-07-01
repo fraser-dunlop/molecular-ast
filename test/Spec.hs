@@ -68,6 +68,8 @@ import Atoms.Chemistry.Telescopes.Example
 import Atoms.Chemistry.Dilution
 import Atoms.Chemistry.Concentration
 
+import Atoms.Chemistry.Solutions.CNF.MiniSat (solveFlatConjunction)
+
 
 import Atoms.Elements.CNF.TypeDisjunction
 import Atoms.Elements.CNF.TypeConjunction
@@ -75,8 +77,12 @@ import Atoms.Elements.CNF.TypeLiteral
 import Atoms.Elements.CNF.Literal
 import Atoms.Elements.CNF.Disjunction
 import Atoms.Elements.CNF.Conjunction
+import Atoms.Elements.CNF.Flattened
 import Atoms.Chemistry.Reductions.CNF.Literals
 import Atoms.Chemistry.Telescopes.CNF.Checkable
+import Atoms.Chemistry.Telescopes.CNF.Flatten
+import Atoms.Chemistry.Extractions.CNF.Flattened
+
 
 
 import Data.Proxy()
@@ -109,23 +115,23 @@ type SimpleMolecule = (Insert Implies SimplerMolecule)
 type SimplerMolecule = (Insert IfAndOnlyIf SimplestMolecule) 
 
 
-type SimplestMolecule = (Insert Variable 
+type SimplestMolecule =
                         (Insert Not
                         (Insert Or 
-                        (Insert And (CNFCore)))))
+                        (Insert And (CNFCore))))
 
 
 
 
-type CNFCore = (Insert TypeLiteral    --including these causes a memory explosion on compilation!!! what!?
+type CNFCore = (Insert Type
+               (Insert TypeLiteral  
                (Insert TypeDisjunction
                (Insert TypeConjunction
                (Insert Conjunction 
                (Insert Disjunction
-               (Insert Literal ('Empty)))))))
+               (Insert Literal (Insert Variable ('Empty)))))))))
 
-type SimplestMoleculeTypeable =  (Insert Type 
-                                 (Insert TypeBool SimplestMolecule))
+type SimplestMoleculeTypeable =  (Insert TypeBool SimplestMolecule)
 
 
 withTestEnv :: forall g m env a.
@@ -161,7 +167,11 @@ transformToCheckableCNFSimple :: MonadError String m => Pure # (Molecule (Varian
                                                      -> m (Bool, (Pure # Molecule (VariantF CNFCore)))
 transformToCheckableCNFSimple x = transformToCheckableCNF x
 
-  
+ 
+inferCNF :: Pure # (Molecule (VariantF CNFCore))
+       -> Either (TypeError CNFCore # Pure)
+                 (Pure # Scheme (Types CNFCore) (TypeOf (Molecule (VariantF CNFCore)))) 
+inferCNF x = execPureInfer (withCNFTestEnv id (inferExpr x))  
 
 inferSimple :: Pure # (Molecule (VariantF SimplestMoleculeTypeable))
        -> Either (TypeError SimplestMoleculeTypeable # Pure)
@@ -174,8 +184,8 @@ parseSomeMol = runParser (parser LeftRecursive) ""
 
 genTest :: IO (Pure # (Molecule (VariantF SimpleMoleculeGen)))
 genTest = do
-   gend <- genTimeLimited gen 1000 
-   if length (Pretty.render (pPrint gend)) < 40
+   gend <- genTimeLimited gen 10
+   if length (Pretty.render (pPrint gend)) < 10 || length (Pretty.render (pPrint gend)) > 20
       then genTest
       else return gend
 
@@ -200,27 +210,29 @@ main = do
         gend <- genTest     
         print $ pPrint gend
         putStrLn "parsing"
+        hFlush stdout
+
         case parseSomeMol $ pack $ Pretty.render $ pPrint gend of
              Left err -> error $ show err 
              Right q -> do
                 -- TODO implement equality on Molecules
                 -- p should equal gend since we parse Parens added by pretty printing then remove them 
-                let (c,p) = removeParens q  
-                putStrLn $ "removeParens " ++ show c
-                print $ pPrint p
-                putStrLn "deMorganNegationOfConjunctionFixed"
-                let p1 = deMorganNegationOfConjunctionFixed p 
-                print $ fst p1
-                print $ pPrint $ snd p1 
-                putStrLn "deMorganNegationOfDisjunctionFixed"
-                let p2 = deMorganNegationOfDisjunctionFixed $ snd p1 
-                print $ fst p2
-                print $ pPrint $ snd p2
-                             
-
-                let (c3,p3 :: Pure # Molecule (VariantF SimplerMolecule)) = eliminateImplies $ snd p2 
-                putStrLn $ "eliminateImplies " ++ show c3
-                print $ pPrint p3
+--                let (c,p) = removeParens q  
+--                putStrLn $ "removeParens " ++ show c
+--                print $ pPrint p
+--                putStrLn "deMorganNegationOfConjunctionFixed"
+--                let p1 = deMorganNegationOfConjunctionFixed p 
+--                print $ fst p1
+--                print $ pPrint $ snd p1 
+--                putStrLn "deMorganNegationOfDisjunctionFixed"
+--                let p2 = deMorganNegationOfDisjunctionFixed $ snd p1 
+--                print $ fst p2
+--                print $ pPrint $ snd p2
+--                             
+--
+--                let (c3,p3 :: Pure # Molecule (VariantF SimplerMolecule)) = eliminateImplies $ snd p2 
+--                putStrLn $ "eliminateImplies " ++ show c3
+--                print $ pPrint p3
 
 --                putStrLn "doubleNegation"
 --                let p4 = foldMolecule doubleNegation p3 
@@ -239,34 +251,53 @@ main = do
 --                let p7 = foldMolecule doubleNegation $ snd p6 
 --                print $ pPrint p7
 
-                let (ch, p8 :: Pure # Molecule (VariantF SimplerMolecule)) = reduction q 
-                putStrLn $ "reduction " ++ show ch
-                print $ pPrint p8
-
-
-                let (ch1, p9 :: Pure # Molecule (VariantF SimplestMolecule)) = eliminateIfAndOnlyIf p8 
-                putStrLn $ "exampleIfAndOnlyIf " ++ show ch1
-                print $ pPrint p9
+--                let (ch, p8 :: Pure # Molecule (VariantF SimplerMolecule)) = reduction q 
+--                putStrLn $ "reduction " ++ show ch
+--                print $ pPrint p8
+--
+--
+--                let (ch1, p9 :: Pure # Molecule (VariantF SimplestMolecule)) = eliminateIfAndOnlyIf p8 
+--                putStrLn $ "exampleIfAndOnlyIf " ++ show ch1
+--                print $ pPrint p9
 
 
                 let (ch2, p10 :: Pure # Molecule (VariantF SimplestMolecule)) = exampleTelescope q 
                 putStrLn $ "exampleTelescope " ++ show ch2
-                print $ pPrint p10
+--                print $ pPrint p10
+                hFlush stdout
 
 
                 let p11 :: Pure # Molecule (VariantF SimplestMoleculeTypeable) =
                          dilute (Proxy @Type) $ dilute (Proxy @TypeBool) p10
 
---                case inferSimple p11 of
---
---                    Left typerr -> print $ "inference failed: " ++ (Pretty.render (pPrint typerr))
---                    Right inferred -> print $ "inference success: " ++ (Pretty.render (pPrint inferred))
+                case inferSimple p11 of
 
+                    Left typerr -> print $ "inference failed: " ++ (Pretty.render (pPrint typerr))
+                    Right inferred -> print $ "inference success: " ++ (Pretty.render (pPrint inferred))
+
+
+                hFlush stdout
 
             
                 case transformToCheckableCNFSimple p10 of
-                    Left typerr -> putStrLn $ "CNF inference failed: " ++ (Pretty.render (pPrint typerr))
-                    Right (_, inferred) -> putStrLn $ "CNF inference success: " ++ (Pretty.render (pPrint inferred))
+                    Left typerr -> putStrLn $ "CNF transform failed: " ++ (Pretty.render (pPrint typerr))
+                    Right (_, transformed ) -> do
+                        putStrLn $ "CNF transform success: " ++ (Pretty.render (pPrint transformed))
+                        case inferCNF transformed of
+                            Left typerr -> print $ "inference failed: " ++ (Pretty.render (pPrint typerr))
+                            Right inferred -> do
+                                print $ "inference success: "  ++ (Pretty.render (pPrint inferred))
+                                let dil :: (Pure # Molecule (VariantF (Insert FlatConjunction (Insert FlatDisjunction CNFCore)))) = dilute (Proxy @FlatConjunction) $ dilute (Proxy @FlatDisjunction) transformed 
+                                case flattenCNF dil of  
+                                    Left err -> print $ "couldn't flatten CNF: " ++ err 
+                                    Right (_, flatted ) -> 
+                                        case extractFlatCNF flatted of
+                                            Left fa -> print $ "flat CNF extraction failed: " ++ fa 
+                                            Right c -> 
+                                               case solveFlatConjunction c of
+                                                   Nothing -> print "no solutions"
+                                                   Just sol -> print sol
+                                   
 
                 putStrLn ""
                 hFlush stdout

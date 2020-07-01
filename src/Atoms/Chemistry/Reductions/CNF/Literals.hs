@@ -26,7 +26,7 @@ class ( HasF Not f
       , ForAllIn Traversable f
       , ForAllIn Functor t
       , ForAllIn Pretty1 t
-      , Insert Not (Insert Variable t) ~ f
+      , Insert Not t ~ f
       , Follow (Locate Not f) f ~ Not 
       , FromSides (Locate Not f)
       , Follow (Locate Variable f) f ~ Variable 
@@ -52,7 +52,7 @@ instance ( HasF Variable f
          , ForAllIn Traversable f
          , ForAllIn Functor t
          , ForAllIn Pretty1 t
-         , Insert Not (Insert Variable t) ~ f
+         , Insert Not t ~ f
          , Follow (Locate Not f) f ~ Not 
          , FromSides (Locate Not f)
          , Follow (Locate Variable f) f ~ Variable 

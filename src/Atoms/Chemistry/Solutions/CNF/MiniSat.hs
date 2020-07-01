@@ -2,6 +2,7 @@ module Atoms.Chemistry.Solutions.CNF.MiniSat where
 import Atoms.Elements.CNF.Flattened
 import Atoms.Elements.CNF.Literal
 import Atoms.Elements.Name
+import Data.Map
 import SAT.MiniSat
 
 literal :: Literal h -> Formula Name 
@@ -15,3 +16,7 @@ disjunction (FlatDisjunctionNode left right) = disjunction left :||: disjunction
 conjunction :: FlatConjunction h -> Formula Name 
 conjunction (FlatConjunctionSingleton d) = disjunction d 
 conjunction (FlatConjunctionNode left right) = conjunction left :&&: conjunction right 
+
+solveFlatConjunction :: FlatConjunction h -> Maybe (Map Name Bool) 
+solveFlatConjunction = solve . conjunction
+

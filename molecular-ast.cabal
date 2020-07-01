@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8dcf0629f2455a0bf3fc16f201e480f176c757dfc7e22592f563b3f06f10386a
+-- hash: c40b3be8f10dd8fea83b09e8d1f1f9ed8a3639bdf4a816a1d3cbeadb9edee788
 
 name:           molecular-ast
 version:        0.1.0.0
@@ -28,6 +28,7 @@ source-repository head
 library
   exposed-modules:
       Atoms.Chemistry.Cascades.DeMorgan
+      Atoms.Chemistry.Cascades.DistributeOrsOverAnds
       Atoms.Chemistry.Cascades.DoubleNegation
       Atoms.Chemistry.Concentration
       Atoms.Chemistry.Dilution
@@ -44,6 +45,7 @@ library
       Atoms.Chemistry.Telescopes.CNF.Flatten
       Atoms.Chemistry.Telescopes.Example
       Atoms.Chemistry.Transformations.DeMorgan
+      Atoms.Chemistry.Transformations.DistributeOrsOverAnds
       Atoms.Chemistry.Transformations.DoubleNegation
       Atoms.Chemistry.Utils.FixedPoint
       Atoms.Elements.And

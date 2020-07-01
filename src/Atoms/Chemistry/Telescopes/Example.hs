@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleInstances    #-}
 module Atoms.Chemistry.Telescopes.Example where
 import Atoms.Chemistry.Cascades.DeMorgan
+import Atoms.Chemistry.Cascades.DistributeOrsOverAnds
 import Atoms.Chemistry.Cascades.DoubleNegation
 import Atoms.Chemistry.Reductions.EliminateImplies
 import Atoms.Chemistry.Reductions.EliminateIfAndOnlyIf
@@ -17,6 +18,7 @@ class ( RemoveParens a b
       , EliminateIfAndOnlyIf c d 
       , DeMorganCascades d
       , DoubleNegationCascades d
+      , DistributeOrsOverAndsCascades d
       ) => ExampleTelescope a b c d where
     exampleTelescope :: Pure # (Molecule (VariantF a)) 
                      -> (Bool, Pure # (Molecule (VariantF d)))
@@ -26,6 +28,7 @@ instance ( RemoveParens a b
          , EliminateIfAndOnlyIf c d 
          , DeMorganCascades d
          , DoubleNegationCascades d
+         , DistributeOrsOverAndsCascades d
          ) => ExampleTelescope a b c d where 
     exampleTelescope molecule =
         let (cb, b) = removeParens molecule
@@ -34,6 +37,7 @@ instance ( RemoveParens a b
             e = fixedPointLoop [ deMorganNegationOfDisjunctionFixed
                                , deMorganNegationOfConjunctionFixed
                                , doubleNegationFixed
+                               , distributeOrsOverAndsFixed
                                ] d 
          in (cb || cc || cd , e)
 

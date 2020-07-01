@@ -15,37 +15,33 @@ import Type.Set.VariantF
 import Control.Monad.ST.Trans
 import Control.Monad.Except
 
-class ( HasF Literal f
+class ( HasF Literal t
       , HasF FlatDisjunction t
       , ForAllIn Functor t
-      , ForAllIn Functor f
-      , ForAllIn Foldable f
-      , ForAllIn Traversable f
-      , Insert Literal t ~ f
-      , Follow (Locate Literal f) f ~ Literal
-      , FromSides (Locate Literal f)
+      , ForAllIn Foldable t
+      , ForAllIn Traversable t
+      , Follow (Locate Literal t) t ~ Literal
+      , FromSides (Locate Literal t)
       , MonadError String m
-      ) => MoveLiteralsIntoFlatDisjunctions m f t where
+      ) => MoveLiteralsIntoFlatDisjunctions m t where
     moveLiteralsIntoFlatDisjunction1 :: STRef s Bool
-                 -> VariantF f (Pure # Molecule (VariantF t))
+                 -> VariantF t (Pure # Molecule (VariantF t))
                  -> STT s m (Pure # Molecule (VariantF t))
-    moveLiteralsIntoFlatDisjunction :: Pure # Molecule (VariantF f)
+    moveLiteralsIntoFlatDisjunction :: Pure # Molecule (VariantF t)
                 -> m (Bool, Pure # Molecule (VariantF t))
 
 
-instance ( HasF Literal f
+instance ( HasF Literal t
          , HasF FlatDisjunction t
          , ForAllIn Functor t
-         , ForAllIn Functor f
-         , ForAllIn Foldable f
-         , ForAllIn Traversable f
-         , Insert Literal t ~ f
-         , Follow (Locate Literal f) f ~ Literal
-         , FromSides (Locate Literal f)
+         , ForAllIn Foldable t
+         , ForAllIn Traversable t
+         , Follow (Locate Literal t) t ~ Literal
+         , FromSides (Locate Literal t)
          , MonadError String m 
-         ) => MoveLiteralsIntoFlatDisjunctions m f t where
+         ) => MoveLiteralsIntoFlatDisjunctions m t where
     moveLiteralsIntoFlatDisjunction1 changed (VariantF (tag :: SSide ss) res) = 
-        case (testEquality tag (fromSides @(Locate Literal f)), proveFollowInsert @ss @Literal @t) of
+        case (testEquality tag (fromSides @(Locate Literal t)), proveFollowInsert @ss @Literal @t) of
             (Just Refl, HRefl) -> case res of
                                       _ -> do
                                         writeSTRef changed True
@@ -59,41 +55,37 @@ instance ( HasF Literal f
 
 
 
-class ( HasF Disjunction f
+class ( HasF Disjunction t
       , HasF FlatDisjunction t
       , ForAllIn Functor t
-      , ForAllIn Functor f
-      , ForAllIn Foldable f
-      , ForAllIn Traversable f
-      , Insert Disjunction t ~ f
-      , Follow (Locate Disjunction f) f ~ Disjunction
-      , FromSides (Locate Disjunction f)
+      , ForAllIn Foldable t
+      , ForAllIn Traversable t
+      , Follow (Locate Disjunction t) t ~ Disjunction
+      , FromSides (Locate Disjunction t)
       , Follow (Locate FlatDisjunction t) t ~ FlatDisjunction
       , FromSides (Locate FlatDisjunction t)
       , MonadError String m
-      ) => MoveDisjunctionsIntoFlatDisjunctions m f t where
+      ) => MoveDisjunctionsIntoFlatDisjunctions m t where
     flattenDisjunctions1 :: STRef s Bool
-                 -> VariantF f (Pure # Molecule (VariantF t))
+                 -> VariantF t (Pure # Molecule (VariantF t))
                  -> STT s m (Pure # Molecule (VariantF t))
-    flattenDisjunctions :: Pure # Molecule (VariantF f)
+    flattenDisjunctions :: Pure # Molecule (VariantF t)
                 -> m (Bool, Pure # Molecule (VariantF t))
 
 
-instance ( HasF Disjunction f
+instance ( HasF Disjunction t
          , HasF FlatDisjunction t
          , ForAllIn Functor t
-         , ForAllIn Functor f
-         , ForAllIn Foldable f
-         , ForAllIn Traversable f
-         , Insert Disjunction t ~ f
-         , Follow (Locate Disjunction f) f ~ Disjunction
-         , FromSides (Locate Disjunction f)
+         , ForAllIn Foldable t
+         , ForAllIn Traversable t
+         , Follow (Locate Disjunction t) t ~ Disjunction
+         , FromSides (Locate Disjunction t)
          , Follow (Locate FlatDisjunction t) t ~ FlatDisjunction
          , FromSides (Locate FlatDisjunction t)
          , MonadError String m 
-         ) => MoveDisjunctionsIntoFlatDisjunctions m f t where
+         ) => MoveDisjunctionsIntoFlatDisjunctions m t where
     flattenDisjunctions1 changed (VariantF (tag :: SSide ss) res) = 
-        case (testEquality tag (fromSides @(Locate Disjunction f)), proveFollowInsert @ss @Disjunction @t) of
+        case (testEquality tag (fromSides @(Locate Disjunction t)), proveFollowInsert @ss @Disjunction @t) of
             (Just Refl, HRefl) ->
                 case res of                 
                    Disjunction (Pure (Molecule (VariantF (tagl :: SSide ssl) resl))) (Pure (Molecule (VariantF (tagr :: SSide ssr) resr))) -> do
@@ -113,37 +105,33 @@ instance ( HasF Disjunction f
         return (cha, res)
 
 
-class ( HasF FlatDisjunction f
+class ( HasF FlatDisjunction t
       , HasF FlatConjunction t
       , ForAllIn Functor t
-      , ForAllIn Functor f
-      , ForAllIn Foldable f
-      , ForAllIn Traversable f
-      , Insert FlatDisjunction t ~ f
-      , Follow (Locate FlatDisjunction f) f ~ FlatDisjunction
-      , FromSides (Locate FlatDisjunction f)
+      , ForAllIn Foldable t
+      , ForAllIn Traversable t
+      , Follow (Locate FlatDisjunction t) t ~ FlatDisjunction
+      , FromSides (Locate FlatDisjunction t)
       , MonadError String m 
-      ) => MoveFlatDisjunctionsIntoFlatConjunctions m f t where
+      ) => MoveFlatDisjunctionsIntoFlatConjunctions m t where
     moveFlatDisjunctionsIntoFlatConjunction1 :: STRef s Bool
-                 -> VariantF f (Pure # Molecule (VariantF t))
+                 -> VariantF t (Pure # Molecule (VariantF t))
                  -> STT s m (Pure # Molecule (VariantF t))
-    moveFlatDisjunctionsIntoFlatConjunction :: Pure # Molecule (VariantF f)
+    moveFlatDisjunctionsIntoFlatConjunction :: Pure # Molecule (VariantF t)
                 -> m (Bool, Pure # Molecule (VariantF t))
 
 
-instance ( HasF FlatDisjunction f
+instance ( HasF FlatDisjunction t
          , HasF FlatConjunction t
          , ForAllIn Functor t
-         , ForAllIn Functor f
-         , ForAllIn Foldable f
-         , ForAllIn Traversable f
-         , Insert FlatDisjunction t ~ f
-         , Follow (Locate FlatDisjunction f) f ~ FlatDisjunction
-         , FromSides (Locate FlatDisjunction f)
+         , ForAllIn Foldable t
+         , ForAllIn Traversable t
+         , Follow (Locate FlatDisjunction t) t ~ FlatDisjunction
+         , FromSides (Locate FlatDisjunction t)
          , MonadError String m 
-         ) => MoveFlatDisjunctionsIntoFlatConjunctions m f t where
+         ) => MoveFlatDisjunctionsIntoFlatConjunctions m t where
     moveFlatDisjunctionsIntoFlatConjunction1 changed (VariantF (tag :: SSide ss) res) = 
-        case (testEquality tag (fromSides @(Locate FlatDisjunction f)), proveFollowInsert @ss @FlatDisjunction @t) of
+        case (testEquality tag (fromSides @(Locate FlatDisjunction t)), proveFollowInsert @ss @FlatDisjunction @t) of
             (Just Refl, HRefl) -> case res of
                                       _ -> do
                                         writeSTRef changed True
@@ -157,41 +145,37 @@ instance ( HasF FlatDisjunction f
 
 
 
-class ( HasF Conjunction f
+class ( HasF Conjunction t
       , HasF FlatConjunction t
       , ForAllIn Functor t
-      , ForAllIn Functor f
-      , ForAllIn Foldable f
-      , ForAllIn Traversable f
-      , Insert Conjunction t ~ f
-      , Follow (Locate Conjunction f) f ~ Conjunction
-      , FromSides (Locate Conjunction f)
+      , ForAllIn Foldable t
+      , ForAllIn Traversable t
+      , Follow (Locate Conjunction t) t ~ Conjunction
+      , FromSides (Locate Conjunction t)
       , Follow (Locate FlatConjunction t) t ~ FlatConjunction
       , FromSides (Locate FlatConjunction t)
       , MonadError String m
-      ) => MoveConjunctionsIntoFlatConjunctions m f t where
+      ) => MoveConjunctionsIntoFlatConjunctions m t where
     flattenConjunctions1 :: STRef s Bool
-                 -> VariantF f (Pure # Molecule (VariantF t))
+                 -> VariantF t (Pure # Molecule (VariantF t))
                  -> STT s m (Pure # Molecule (VariantF t))
-    flattenConjunctions :: Pure # Molecule (VariantF f)
+    flattenConjunctions :: Pure # Molecule (VariantF t)
                 -> m (Bool, Pure # Molecule (VariantF t))
 
 
-instance ( HasF Conjunction f
+instance ( HasF Conjunction t
          , HasF FlatConjunction t
          , ForAllIn Functor t
-         , ForAllIn Functor f
-         , ForAllIn Foldable f
-         , ForAllIn Traversable f
-         , Insert Conjunction t ~ f
-         , Follow (Locate Conjunction f) f ~ Conjunction
-         , FromSides (Locate Conjunction f)
+         , ForAllIn Foldable t
+         , ForAllIn Traversable t
+         , Follow (Locate Conjunction t) t ~ Conjunction
+         , FromSides (Locate Conjunction t)
          , Follow (Locate FlatConjunction t) t ~ FlatConjunction
          , FromSides (Locate FlatConjunction t)
          , MonadError String m 
-         ) => MoveConjunctionsIntoFlatConjunctions m f t where
+         ) => MoveConjunctionsIntoFlatConjunctions m t where
     flattenConjunctions1 changed (VariantF (tag :: SSide ss) res) = 
-        case (testEquality tag (fromSides @(Locate Conjunction f)), proveFollowInsert @ss @Conjunction @t) of
+        case (testEquality tag (fromSides @(Locate Conjunction t)), proveFollowInsert @ss @Conjunction @t) of
             (Just Refl, HRefl) ->
                 case res of                 
                    Conjunction (Pure (Molecule (VariantF (tagl :: SSide ssl) resl))) (Pure (Molecule (VariantF (tagr :: SSide ssr) resr))) -> do
