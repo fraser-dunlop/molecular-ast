@@ -99,6 +99,8 @@ import Data.Text (Text, pack)
 
 import System.IO (hFlush, stdout)
 
+import qualified Atoms.Chemistry.Utils.TH as ATH
+
 
 type SimpleMoleculeP = (Insert Parens SimpleMolecule)
 
@@ -206,6 +208,8 @@ reduction molecule =
 
 main :: IO ()
 main = do
+    ATH.test
+    error "done"
     void $ sequence $ replicate 1000 $ do
         putStrLn "random generating"
         gend <- genTest     

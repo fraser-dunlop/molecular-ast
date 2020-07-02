@@ -4,7 +4,11 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
+<<<<<<< HEAD
 -- hash: 3030f2d08aac139a7b3266d0c6d4b6bc020923d33d1fb978ce99876c8217c125
+=======
+-- hash: fa6d14ba7acca3c69f0ef6fda13edb17073c7e00b7cc2f5a5a48f51154d538ad
+>>>>>>> a5f91b2... some TH experimentation
 
 name:           molecular-ast
 version:        0.1.0.0
@@ -60,6 +64,7 @@ library
       Atoms.Chemistry.Transformations.PropCalc.NegateLitBool
       Atoms.Chemistry.Transformations.PropCalc.Tautology
       Atoms.Chemistry.Utils.FixedPoint
+      Atoms.Chemistry.Utils.TH
       Atoms.Elements.CNF.Conjunction
       Atoms.Elements.CNF.Disjunction
       Atoms.Elements.CNF.Flattened
