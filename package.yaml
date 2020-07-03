@@ -46,6 +46,7 @@ dependencies:
 - cmptype
 - STMonadTrans
 - minisat-solver
+- haskell-src-meta
 
 default-extensions:
 - ConstraintKinds

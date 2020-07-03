@@ -66,17 +66,21 @@ instance ( HasF And t
                   Just Refl ->
                     case resl of
                       Not (Pure (Molecule xl@(VariantF tagxl resxl))) -> do 
-                        case ( testEquality tagxl (fromSides @(Locate Variable t))
-                             , testEquality tagr (fromSides @(Locate Variable t))) of
-                          (Just Refl, Just Refl) ->
-                             case (resxl, resr) of
-                               (Variable vl, Variable vr) ->
-                                 if vl == vr
-                                   then do
-                                     writeSTRef changed True
-                                     pure $ iLitBool False 
-                                   else pureVNode v
-                          (_,_) -> pureVNode v
+                        case testEquality tagxl (fromSides @(Locate Variable t)) of
+                          Just Refl ->
+                            case resxl of
+                              Variable vl ->
+                                case testEquality tagr (fromSides @(Locate Variable t)) of
+                                  Just Refl ->
+                                     case resr of
+                                       Variable vr ->
+                                         if vl == vr
+                                           then do
+                                             writeSTRef changed True
+                                             pure $ iLitBool False 
+                                           else pureVNode v
+                                  _ -> pureVNode v
+                          _ -> pureVNode v
                   Nothing ->
                     case testEquality tagr (fromSides @(Locate Not t)) of
                       Just Refl -> 
