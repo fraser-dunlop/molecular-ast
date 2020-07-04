@@ -8,6 +8,7 @@ cabal-version: 1.12
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 -- hash: 3030f2d08aac139a7b3266d0c6d4b6bc020923d33d1fb978ce99876c8217c125
 =======
 -- hash: fa6d14ba7acca3c69f0ef6fda13edb17073c7e00b7cc2f5a5a48f51154d538ad
@@ -21,6 +22,9 @@ cabal-version: 1.12
 =======
 -- hash: a332eb45cfa2b523a56443eddb45b4587dfdb4b973900e0b0c4ceb777c00d1d6
 >>>>>>> 7347755... BiPlate universe for Atom extraction
+=======
+-- hash: 358c645bdfdd65657364d8f35c8e3eb16744ce785cfcc045478730fbfcf6d748
+>>>>>>> 5cc6ce1... fixed wild patterns and match recursion
 
 name:           molecular-ast
 version:        0.1.0.0
@@ -67,6 +71,7 @@ library
       Atoms.Chemistry.Telescopes.Example
       Atoms.Chemistry.Telescopes.PropCalcToCNF.Checkable
       Atoms.Chemistry.Transformations.PropCalc.Absorption
+      Atoms.Chemistry.Transformations.PropCalc.Absorption_TH
       Atoms.Chemistry.Transformations.PropCalc.Contradiction
       Atoms.Chemistry.Transformations.PropCalc.DeMorgan
       Atoms.Chemistry.Transformations.PropCalc.DistributeOrsOverAnds

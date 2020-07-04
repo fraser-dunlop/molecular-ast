@@ -60,6 +60,7 @@ isBoundAsVariantF b _ = False
 
 sortCases :: [CaseTree [a]] -> [CaseTree [a]]
 sortCases = sortBy (\l r -> case (l,r) of
+                              (CaseMatch WildP _ _, CaseMatch _ _ _) -> GT 
                               (CaseMatch pl _ _, CaseMatch pr _ _) -> pr `compare` pl
                               (CaseExp _ _,_) -> LT
                               (CaseBody _,_) -> GT)
@@ -98,7 +99,7 @@ promotePatterns bv (CaseMatch con@(ConP _ _) bvs tr) =
    \d -> ProofExp con bv [CaseExp bv [CaseMatch con bvs
                               [(chainFold d (promotePatterns bv <$> tr))]]]
                          [ d ]
-promotePatterns _ cm@(CaseMatch _ _ _) = \_ -> cm
+promotePatterns bu (CaseMatch p bv ct) = \d -> CaseMatch p bv ((\p -> p d) <$> (promotePatterns bu <$> ct))
 promotePatterns _ (CaseBody a) = \_ -> CaseBody a
 promotePatterns _ _ = error "promotePatterns" 
 
@@ -138,8 +139,9 @@ liftCase i bv p = do
   where
     liftCase' :: NewVarM m => BoundVar -> Pat
               -> m (Either (BoundVar -> BoundVar) (CaseTree [a] -> CaseTree [a]))
+    liftCase' bv (AsP nm p) = liftCase' (CapturedAs nm bv) p  
     liftCase' bv (ParensP p) = liftCase' bv p
-    liftCase' bv WildP = pure $ Right (\d -> d) 
+    liftCase' bv WildP = pure $ Right (\d -> CaseExp bv [(CaseMatch WildP [] [d])]) 
     liftCase' bv (VarP s) = pure $ Left (captureVar s (inVar bv)) 
     liftCase' bv (ConP s pats) = do
        cases <- sequence ((\p -> do
@@ -229,6 +231,7 @@ inCaseTree t [CaseExp bv tr] = do
   matches <- matchTree t tr
   pure (NormalB (CaseE (VarE res) matches)) 
 inCaseTree t [CaseBody [bod]] = pure bod 
+inCaseTree t [CaseMatch WildP _ ct] = inCaseTree t ct 
 inCaseTree _ e = error $ "inCaseTree: unexpected" ++ show e
 
 
