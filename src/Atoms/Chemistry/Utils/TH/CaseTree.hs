@@ -49,6 +49,18 @@ data CaseTree a = ProofExp Pat BoundVar [CaseTree a] [CaseTree a]
                 | CaseBody a    
   deriving Show
 
+addDefaultToGuardedBodies :: CaseTree [Body] -> CaseTree [Body] -> CaseTree [Body]
+addDefaultToGuardedBodies defolt (CaseExp bve [m@(CaseMatch _ _ [CaseBody [GuardedB _]])])
+    = CaseExp bve [m, CaseMatch WildP [] [defolt]]
+addDefaultToGuardedBodies defolt (CaseExp bv ct)
+    = CaseExp bv (addDefaultToGuardedBodies defolt <$> ct) 
+addDefaultToGuardedBodies defolt (ProofExp p bv cts ctf)
+    = ProofExp p bv (addDefaultToGuardedBodies defolt <$> cts) 
+                    (addDefaultToGuardedBodies defolt <$> ctf) 
+addDefaultToGuardedBodies defolt (CaseMatch p bvs ct)
+    = CaseMatch p bvs (addDefaultToGuardedBodies defolt <$> ct) 
+addDefaultToGuardedBodies _ e = e
+
 
 isBoundAsVariantF :: BoundVar -> CaseTree [a] -> Bool
 isBoundAsVariantF (BoundVar _ _) _ = True
@@ -60,10 +72,11 @@ isBoundAsVariantF b _ = False
 
 sortCases :: [CaseTree [a]] -> [CaseTree [a]]
 sortCases = sortBy (\l r -> case (l,r) of
-                              (CaseMatch WildP _ _, CaseMatch _ _ _) -> GT 
+                              (CaseMatch WildP _ _,_) -> GT 
                               (CaseMatch pl _ _, CaseMatch pr _ _) -> pr `compare` pl
                               (CaseExp _ _,_) -> LT
-                              (CaseBody _,_) -> GT)
+                              (CaseBody _,_) -> GT
+                              (ProofExp _ _ _ _, _) -> LT)
 
 mergeMatches :: [CaseTree [a]] -> [CaseTree [a]]
 mergeMatches  [] = []
@@ -82,6 +95,7 @@ chainFold a (h:t) = chainFold (h a) t
 
 proofChain :: [CaseTree [a]] -> Maybe (CaseTree [a])
 proofChain [p@(ProofExp _ _ _ _)] = Just p
+proofChain ((ProofExp pt bv su _):(p@(CaseMatch WildP _ _)):[]) = Just (ProofExp pt bv su [p])
 proofChain ((ProofExp pt bv su _):p:[]) = Just (ProofExp pt bv su [p])
 proofChain (h@(ProofExp _ _ _ _):p:ps) =
   case proofChain (p:ps) of
@@ -92,7 +106,7 @@ proofChain _ = Nothing
 promotePatterns :: BoundVar -> CaseTree [a] -> (CaseTree [a] -> CaseTree [a])
 promotePatterns _ (CaseExp bv tr) =
   \d -> let could_be_proofs = (\p -> p d) <$> (promotePatterns bv <$> tr)
-          in case proofChain could_be_proofs of
+          in case proofChain (sortCases could_be_proofs) of
             Nothing -> CaseExp bv could_be_proofs
             Just pc -> CaseExp bv [pc] 
 promotePatterns bv (CaseMatch con@(ConP _ _) bvs tr) =
@@ -207,8 +221,8 @@ defaultCase nm = CaseBody [(NormalB (AppE (VarE (mkName "pure"))
 templateCaseTree :: Name -> CaseTree [Body] -> Q (Pat, Body)
 templateCaseTree t c@(CaseExp bv tr) = do 
   (node, topv) <- topBoundVar bv
-  ct <- case promotePatterns bv c (defaultCase node) of
-          (CaseExp _ tr) -> inCaseTree t (trace (show tr) tr)
+  ct <- case addDefaultToGuardedBodies (defaultCase node) (promotePatterns bv c (defaultCase node)) of
+          e@(CaseExp _ tr) -> inCaseTree t tr
           _ -> error "templateCaseTree."
   pure (topv, ct)
 templateCaseTree _ _ = error "templateCaseTree"
@@ -226,13 +240,26 @@ inCaseTree t [(ProofExp (ConP nm []) bv su fa)] = do
         ]
     ))
 inCaseTree t [CaseExp _ [p@(ProofExp _ _ _ _)]] = inCaseTree t [p] 
-inCaseTree t [CaseExp bv tr] = do
+inCaseTree t [CaseExp bv tr] =  do
   let (_, res) = inVar bv
   matches <- matchTree t tr
   pure (NormalB (CaseE (VarE res) matches)) 
 inCaseTree t [CaseBody [bod]] = pure bod 
-inCaseTree t [CaseMatch WildP _ ct] = inCaseTree t ct 
+inCaseTree t [CaseMatch WildP _ [CaseExp _ [p@(ProofExp _ _ _ _)]]] = inCaseTree t [p] 
 inCaseTree _ e = error $ "inCaseTree: unexpected" ++ show e
+
+prettyCaseTree ind (ProofExp c b trs trf) =
+   (replicate ind ' ') ++ "proof " ++ show c ++ " ~ " ++ show b ++ " of\n"
+   ++ (replicate (ind + 2) ' ') ++ "Just Refl ->\n" 
+   ++ join (prettyCaseTree (ind + 4) <$> trs)
+   ++ (replicate (ind + 2) ' ') ++ "_ ->\n" 
+   ++ join (prettyCaseTree (ind + 2) <$> trf)
+
+prettyCaseTree ind (CaseExp b tr) = (replicate ind ' ') ++ "case " ++ show b ++ " of\n" ++ join (prettyCaseTree (ind + 2) <$> tr)
+prettyCaseTree ind (CaseMatch s bs tr) = (replicate ind ' ') ++ show s ++ " " ++ unwords (show <$> bs) ++ "->\n" ++ join (prettyCaseTree (ind + 2) <$> tr) 
+prettyCaseTree ind (CaseBody is) = (replicate ind ' ') ++ show is ++ "\n"
+
+
 
 
 matchTree :: Name -> [CaseTree [Body]] -> Q [Match] 
@@ -259,6 +286,6 @@ matchTree t ((CaseMatch (ConP _ [ConP _ []]) _ tr):rest) = do
     cont <- inCaseTree t tr
     following <- matchTree t rest
     pure ((Match (ConP (mkName "Just") [ConP (mkName "Refl") []]) cont []):following)
-matchTree _ e = error $ "matchTree " ++ show e 
+matchTree _ e = error $ "matchTree\n\n\n " ++ (unlines (prettyCaseTree 0 <$> e)) 
 
 

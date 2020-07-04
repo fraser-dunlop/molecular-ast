@@ -8,6 +8,7 @@ import Atoms.Chemistry.Utils.TH
 import Atoms.Elements.Generic.Variable
 import Atoms.Elements.PropCalc.And
 import Atoms.Elements.PropCalc.Or
+import Atoms.Elements.PropCalc.Not
 import Atoms.Molecule.AST
 import Data.Type.Equality
 import Hyper
@@ -26,11 +27,20 @@ absorptionTH changed v@(And (Variable p) (Or (Variable p') _)) =
         writeSTRef changed True
         pure (iVariable p) 
       else pureVNode v 
+absorptionTH changed v@(And (Not (Variable p)) (Or (Not (Variable p')) _)) = 
+    if p == p' 
+      then do
+        writeSTRef changed True
+        pure (iNot (iVariable p)) 
+      else pureVNode v 
 absorptionTH changed v@(And (Variable p) (Or _ (Variable p'))) = 
     if p == p' 
       then do
         writeSTRef changed True
         pure (iVariable p) 
       else pureVNode v 
- 
+absorptionTH changed v@(And (Not (Variable p)) (Or _ (Not (Variable p')))) | p == p' = do 
+    writeSTRef changed True
+    pure (iNot (iVariable p)) 
+
 |]
