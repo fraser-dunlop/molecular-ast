@@ -6,6 +6,7 @@ cabal-version: 1.12
 --
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 -- hash: 3030f2d08aac139a7b3266d0c6d4b6bc020923d33d1fb978ce99876c8217c125
 =======
 -- hash: fa6d14ba7acca3c69f0ef6fda13edb17073c7e00b7cc2f5a5a48f51154d538ad
@@ -13,6 +14,9 @@ cabal-version: 1.12
 =======
 -- hash: 24fff9eda5414a40fa20e2eced2635c092507d95a980545c8e09928e7f95eaed
 >>>>>>> 7c80210... rough hacking
+=======
+-- hash: 20ec05d8b8381a73b222ccac209ffc9a945cb3762547e491d275831f8964b8b3
+>>>>>>> 29a26f1... some hardcore templating
 
 name:           molecular-ast
 version:        0.1.0.0
@@ -69,6 +73,7 @@ library
       Atoms.Chemistry.Transformations.PropCalc.Tautology
       Atoms.Chemistry.Utils.FixedPoint
       Atoms.Chemistry.Utils.TH
+      Atoms.Chemistry.Utils.TH.CaseTree
       Atoms.Chemistry.Utils.TH_test
       Atoms.Elements.CNF.Conjunction
       Atoms.Elements.CNF.Disjunction
