@@ -21,45 +21,21 @@ import qualified Atoms.Molecule.AST
 import Language.Haskell.Meta.Parse
 import Language.Haskell.TH.Quote
 
+import Data.Generics.Uniplate.Data
+
 import Control.Monad (join)
 import Data.List (sort,nub)
 import Data.Char (toUpper)
 import Data.List (isPrefixOf,transpose)
 import Debug.Trace 
 
-class ( HasF Not t
-      , ForAllIn Functor t
-      , ForAllIn Foldable t
-      , ForAllIn Traversable t
-      , Follow (Locate Not t) t ~ Not 
-      , FromSides (Locate Not t)
-      ) => DoubleNegation t where
-    doubleNegation ::  STRef s Bool
-                   -> VariantF t (Pure # Molecule (VariantF t))
-                   -> ST s (Pure # Molecule (VariantF t))
-
-
-
-
-test :: IO ()
-test = do
-   printClassDec
-   putStrLn ""
-   printInstanceDec
-   putStrLn ""
-   let fundef1 = "aFunction changed (Not (Not v)) = v\naFunction changed (And (Variable v) (Variable q)) | v == q = Variable v\naFunction changed (Not v) = v\naFunction changed (Not _) = undefined"
-   let Right [dec] = parseDecs fundef1 
-   print dec
-   print $ extractClassName dec
-   print $ join (extractAtomsTopLevel <$> parseDecs fundef1)
-   let Right nms = join (extractAtomsTopLevel <$> parseDecs fundef1)
-
-
-   print $ join <$> (sequence [(Right ["a","b"] :: Either String [String]),Right ["c","d"]])
-
-
 transformation :: QuasiQuoter
-transformation = QuasiQuoter { quoteDec = parseTransformation }
+transformation = QuasiQuoter { 
+    quoteExp  = error "transformation is not an Exp quoter",
+    quotePat  = error "transformation is not a Pat quoter",
+    quoteType = error "transformation is not a Type quoter",
+    quoteDec  = parseTransformation
+  }
 
 hardError :: Either String a -> a
 hardError (Left err) = error err
@@ -182,33 +158,40 @@ extractAtomsFunD (FunD _ clauses) = join <$> (sequence (extractAtomsClause <$> c
 extractAtomsFunD _ = Left "Expecting top level function definition."
 
 extractAtomsClause :: Clause -> Either String [Name]
-extractAtomsClause (Clause (changed:[pat]) body []) = join <$> (sequence [extractAtomsPat pat, extractAtomsBody body]) 
+extractAtomsClause (Clause (changed:[pat]) body []) =
+  Right $ extractAtomsPat pat ++ extractAtomsBody body
 extractAtomsClause (Clause [] _ [])        = Left "Expecting function to pattern match on an Atom. There is no pattern."
 extractAtomsClause (Clause (changed:(pat:_)) _ [])   = Left "Expecting a single Atom pattern in function."
 extractAtomsClause (Clause _ _ _)         = Left "This template does not support where declarations."
 
-extractAtomsPat :: Pat -> Either String [Name]
-extractAtomsPat (ConP nm inside) = (nm:) <$> (join <$> sequence (extractAtomsPat <$> inside)) 
-extractAtomsPat (ParensP pat) = extractAtomsPat pat
-extractAtomsPat (VarP _) = Right []
-extractAtomsPat WildP = Right []
-extractAtomsPat pat = Left $ "Unsupported pattern element: " ++ show pat
+extractAtomsPat :: Pat -> [Name]
+extractAtomsPat p = [ nm | ConP nm _ <- universe p]
 
-extractAtomsBody :: Body -> Either String [Name]
+
+extractAtomsBody :: Body -> [Name]
 extractAtomsBody (NormalB exp) = extractAtomsExp exp 
-extractAtomsBody (GuardedB guardedExps) = join <$> (sequence (extractAtomsExp <$> (snd <$> guardedExps))) 
+extractAtomsBody (GuardedB guardedExps) = 
+   join (extractAtomsGuard <$> (fst <$> guardedExps)) 
+   ++ join (extractAtomsExp <$> (snd <$> guardedExps)) 
 
-extractAtomsExp :: Exp -> Either String [Name]
-extractAtomsExp (ParensE expr) = extractAtomsExp expr
-extractAtomsExp (AppE expl expr) = join <$> (sequence [extractAtomsExp expl, extractAtomsExp expr])
-extractAtomsExp (DoE exprs) = join <$> (sequence (extractAtomsStmt <$> exprs))  
-extractAtomsExp (ConE nm) = Right [nm]
-extractAtomsExp (VarE _) = Right []
-extractAtomsExp exp = Left $ "Unsupported expression: " ++ show exp
+extractAtomsGuard :: Guard -> [Name]
+extractAtomsGuard (NormalG e) = [i | ConE i <- universe e]
+extractAtomsGuard (PatG stmts) = join (extractAtomsStmt <$> stmts)
 
-extractAtomsStmt :: Stmt -> Either String [Name]
+
+extractAtomsExp :: Exp -> [Name]
+extractAtomsExp e = [i | ConE i <- universe e]
+
+extractAtomsStmt :: Stmt -> [Name]
 extractAtomsStmt (NoBindS expr) = extractAtomsExp expr 
-extractAtomsStmt stmt = Left $ "Unsupported statement: " ++ show stmt
+extractAtomsStmt (LetS decs) = join (extractAtomsDec <$> decs)
+extractAtomsStmt (BindS p e) = extractAtomsPat p ++ extractAtomsExp e
+extractAtomsStmt (RecS stmts) = join (extractAtomsStmt <$> stmts)
+extractAtomsStmt _ = error "unsupported statement"
+
+extractAtomsDec :: Dec -> [Name]
+extractAtomsDec (ValD p b decs) =
+   extractAtomsPat p ++ extractAtomsBody b ++ (join (extractAtomsDec <$> decs))  
 
 fullNameAtoms :: [Name] -> Q [Name]
 fullNameAtoms [] = pure []
@@ -222,44 +205,3 @@ fullNameAtoms (a:as) = do
         then pure (lo:ren)
         else pure ren
  
-printClassDec :: IO ()
-printClassDec = do
-   e <- runQ [d| class ( HasF Not t
-                       , ForAllIn Functor t
-                       , ForAllIn Foldable t
-                       , ForAllIn Traversable t
-                       , Follow (Locate Not t) t ~ Not 
-                       , FromSides (Locate Not t)
-                       ) => DoubleNegation t where
-                     doubleNegation ::  STRef s Bool
-                                    -> VariantF t (Pure # Molecule (VariantF t))
-                                    -> ST s (Pure # Molecule (VariantF t))
-
-            |]
-   print e
-
-printInstanceDec :: IO ()
-printInstanceDec = do
-   e <- runQ [d| instance ( HasF Not t
-                          , ForAllIn Functor t
-                          , ForAllIn Foldable t
-                          , ForAllIn Traversable t
-                          , Follow (Locate Not t) t ~ Not 
-                          , FromSides (Locate Not t)
-                          ) => DoubleNegation t where
-                     doubleNegation changed (VariantF tag res) =
-                         case testEquality tag (fromSides @(Locate Not t)) of
-                             Just Refl ->
-                                 case res of
-                                     Not a@(Pure (Molecule (VariantF tagi resi))) ->
-                                         case testEquality tagi (fromSides @(Locate Not t)) of
-                                             Just Refl ->
-                                                case resi of
-                                                   Not a -> do
-                                                      writeSTRef changed True
-                                                      pure a 
-                                             Nothing -> pure $ Pure $ Molecule (VariantF tag res) 
-                             _ -> pure (Pure (Molecule (VariantF tag res)))
-             |]
-   print e
-

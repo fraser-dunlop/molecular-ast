@@ -28,8 +28,16 @@ import Prelude
 --  writeSTRef changed True
 --  pure a
 someTransformation changed (And (Variable a) (Not (Variable b))) = pure ((iAnd (iVariable b) (iNot (iVariable a))))
-someTransformation changed (And (Not (Variable c)) (Variable d)) = pure ((iAnd (iNot (iVariable d)) (iVariable c)))
-someTransformation changed (And (Variable e) (Variable f)) = pure ((iAnd (iNot (iVariable e)) (iVariable f)))
+someTransformation changed (And (Not (Variable c)) (Variable d)) = 
+   case d of
+     "d" -> pure ((iAnd (iNot (iVariable d)) (iVariable c)))
+     _ -> pure ((iAnd (iNot (iVariable "d")) (iVariable c)))
+
+someTransformation changed (And (Variable e) (Variable f)) =
+     if e < f
+       then pure ((iAnd (iNot (iVariable e)) (iVariable f)))
+       else pure ((iAnd (iNot (iVariable f)) (iVariable e)))
+
 someTransformation changed x = y
 
 |]

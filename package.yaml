@@ -47,6 +47,7 @@ dependencies:
 - STMonadTrans
 - minisat-solver
 - haskell-src-meta
+- uniplate
 
 default-extensions:
 - ConstraintKinds

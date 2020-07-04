@@ -157,6 +157,7 @@ liftCase i bv p = do
                     $ CaseExp bv [(CaseMatch (ConP s []) (fst <$> cases) [d])]) 
          _ -> pure $ Right (\d -> traverseBVList captures
                    $ CaseExp bv [(CaseMatch (ConP s []) (fst <$> cases) [chainFold d casetrees])])
+    liftCase' _ p = error $ "unsupported pattern fragment " ++ show p
 
 traverseBVList :: [BoundVar -> BoundVar] -> CaseTree a -> CaseTree a
 traverseBVList [] ct = ct

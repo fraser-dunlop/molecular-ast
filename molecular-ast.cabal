@@ -7,6 +7,7 @@ cabal-version: 1.12
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 -- hash: 3030f2d08aac139a7b3266d0c6d4b6bc020923d33d1fb978ce99876c8217c125
 =======
 -- hash: fa6d14ba7acca3c69f0ef6fda13edb17073c7e00b7cc2f5a5a48f51154d538ad
@@ -17,6 +18,9 @@ cabal-version: 1.12
 =======
 -- hash: 20ec05d8b8381a73b222ccac209ffc9a945cb3762547e491d275831f8964b8b3
 >>>>>>> 29a26f1... some hardcore templating
+=======
+-- hash: a332eb45cfa2b523a56443eddb45b4587dfdb4b973900e0b0c4ceb777c00d1d6
+>>>>>>> 7347755... BiPlate universe for Atom extraction
 
 name:           molecular-ast
 version:        0.1.0.0
@@ -151,6 +155,7 @@ library
     , template-haskell
     , text
     , type-sets
+    , uniplate
   default-language: Haskell2010
 
 executable molecular-ast-test-exe
@@ -190,6 +195,7 @@ executable molecular-ast-test-exe
     , template-haskell
     , text
     , type-sets
+    , uniplate
   default-language: Haskell2010
 
 test-suite molecular-ast-test
@@ -230,4 +236,5 @@ test-suite molecular-ast-test
     , template-haskell
     , text
     , type-sets
+    , uniplate
   default-language: Haskell2010
