@@ -208,8 +208,6 @@ reduction molecule =
 
 main :: IO ()
 main = do
-    ATH.test
-    error "done"
     void $ sequence $ replicate 1000 $ do
         putStrLn "random generating"
         gend <- genTest     
