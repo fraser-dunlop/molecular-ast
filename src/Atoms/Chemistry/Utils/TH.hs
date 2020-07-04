@@ -165,7 +165,7 @@ extractAtomsClause (Clause (changed:(pat:_)) _ [])   = Left "Expecting a single 
 extractAtomsClause (Clause _ _ _)         = Left "This template does not support where declarations."
 
 extractAtomsPat :: Pat -> [Name]
-extractAtomsPat p = [ nm | ConP nm _ <- universe p]
+extractAtomsPat p = [ nm | ConP nm _ <- universe p] ++ [ nm | UInfixP _ nm _ <- universe p]
 
 
 extractAtomsBody :: Body -> [Name]

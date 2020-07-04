@@ -8,7 +8,7 @@ import Atoms.Chemistry.Cascades.PropCalc.Tautology
 import Atoms.Chemistry.Cascades.PropCalc.Contradiction
 import Atoms.Chemistry.Cascades.PropCalc.NegateLitBool
 import Atoms.Chemistry.Cascades.PropCalc.Idempotency
-import Atoms.Chemistry.Cascades.PropCalc.Absorption
+import Atoms.Chemistry.Cascades.PropCalc.Absorption_TH
 import Atoms.Chemistry.Reductions.EliminateImplies
 import Atoms.Chemistry.Reductions.EliminateIfAndOnlyIf
 import Atoms.Chemistry.Reductions.RemoveParens
@@ -30,7 +30,7 @@ class ( RemoveParens a b
       , ContradictionCascades d
       , NegateLitBoolCascades d
       , IdempotencyCascades d
-      , AbsorptionCascades d
+      , AbsorptionTHCascades d
       ) => ExampleTelescope a b c d where
     exampleTelescope :: Pure # (Molecule (VariantF a)) 
                      -> (Bool, Pure # (Molecule (VariantF d)))
@@ -46,13 +46,13 @@ instance ( RemoveParens a b
          , ContradictionCascades d
          , NegateLitBoolCascades d
          , IdempotencyCascades d
-         , AbsorptionCascades d
+         , AbsorptionTHCascades d
          ) => ExampleTelescope a b c d where 
     exampleTelescope molecule =
         let (cb, b) = removeParens molecule
             (cc, c) = eliminateImplies b
             (cd, d) = eliminateIfAndOnlyIf c
-            e = fixedPointLoop [ absorptionFixed
+            e = fixedPointLoop [ absorptionTHFixed
                                , dominationAndIdentityFixed
                                , negateLitBoolFixed
                                , tautologyEliminationFixed

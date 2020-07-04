@@ -153,6 +153,7 @@ liftCase i bv p = do
   where
     liftCase' :: NewVarM m => BoundVar -> Pat
               -> m (Either (BoundVar -> BoundVar) (CaseTree [a] -> CaseTree [a]))
+    liftCase' bv (UInfixP pl nm pr) = liftCase' bv (ConP nm [pl,pr])
     liftCase' bv (AsP nm p) = liftCase' (CapturedAs nm bv) p  
     liftCase' bv (ParensP p) = liftCase' bv p
     liftCase' bv WildP = pure $ Right (\d -> CaseExp bv [(CaseMatch WildP [] [d])]) 

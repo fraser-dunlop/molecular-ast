@@ -19,27 +19,85 @@ import Type.Set.VariantF
 import Data.STRef
 import Control.Monad.ST
 
+-- | This templates the AbsorptionTH class
 [transformation|
+-- p /\ (p \/ _) --> p
+absorptionTH changed ((Variable p)                 `And` ((Variable p')       `Or` _)) | p == p' = do 
+    writeSTRef changed True
+    pure (iVariable p) 
 
-absorptionTH changed v@(And (Variable p) (Or (Variable p') _)) = 
-    if p == p' 
-      then do
-        writeSTRef changed True
-        pure (iVariable p) 
-      else pureVNode v 
-absorptionTH changed v@(And (Not (Variable p)) (Or (Not (Variable p')) _)) = 
-    if p == p' 
-      then do
-        writeSTRef changed True
-        pure (iNot (iVariable p)) 
-      else pureVNode v 
-absorptionTH changed v@(And (Variable p) (Or _ (Variable p'))) = 
-    if p == p' 
-      then do
-        writeSTRef changed True
-        pure (iVariable p) 
-      else pureVNode v 
-absorptionTH changed v@(And (Not (Variable p)) (Or _ (Not (Variable p')))) | p == p' = do 
+-- p /\ (_ \/ p) --> p
+absorptionTH changed ((Variable p)                 `And` (_ `Or` (Variable p')))       | p == p' = do
+    writeSTRef changed True
+    pure (iVariable p) 
+
+-- (p \/ _) /\ p --> p
+absorptionTH changed (((Variable p')       `Or` _) `And` (Variable p))                 | p == p' = do 
+    writeSTRef changed True
+    pure (iVariable p) 
+
+-- (_ \/ p) /\ p --> p
+absorptionTH changed ((_ `Or` (Variable p'))       `And` (Variable p))                 | p == p' = do
+    writeSTRef changed True
+    pure (iVariable p) 
+
+-- !p /\ (!p \/ _) --> !p
+absorptionTH changed ((Not (Variable p))           `And` ((Not (Variable p')) `Or` _)) | p == p' = do 
+    writeSTRef changed True
+    pure (iNot (iVariable p)) 
+
+-- !p /\ (_ \/ !p) --> !p
+absorptionTH changed ((Not (Variable p))           `And` (_ `Or` (Not (Variable p')))) | p == p' = do 
+    writeSTRef changed True
+    pure (iNot (iVariable p)) 
+
+-- (!p \/ _) /\ !p --> !p
+absorptionTH changed (((Not (Variable p')) `Or` _) `And` (Not (Variable p)))           | p == p' = do 
+    writeSTRef changed True
+    pure (iNot (iVariable p)) 
+
+-- (_ \/ !p) /\ !p --> !p
+absorptionTH changed ((_ `Or` (Not (Variable p'))) `And` (Not (Variable p)))           | p == p' = do 
+    writeSTRef changed True
+    pure (iNot (iVariable p)) 
+
+-- p \/ (p /\ _) --> p
+absorptionTH changed ((Variable p)                 `Or` ((Variable p')       `And` _)) | p == p' = do 
+    writeSTRef changed True
+    pure (iVariable p) 
+
+-- p \/ (_ /\ p) --> p
+absorptionTH changed ((Variable p)                 `Or` (_ `And` (Variable p')))       | p == p' = do
+    writeSTRef changed True
+    pure (iVariable p) 
+
+-- (p /\ _) \/ p --> p
+absorptionTH changed (((Variable p')       `And` _) `Or` (Variable p))                 | p == p' = do 
+    writeSTRef changed True
+    pure (iVariable p) 
+
+-- (_ /\ p) \/ p --> p
+absorptionTH changed ((_ `And` (Variable p'))       `Or` (Variable p))                 | p == p' = do
+    writeSTRef changed True
+    pure (iVariable p) 
+
+-- !p \/ (!p /\ _) --> !p
+absorptionTH changed ((Not (Variable p))            `Or` ((Not (Variable p')) `And` _)) | p == p' = do 
+    writeSTRef changed True
+    pure (iNot (iVariable p)) 
+
+-- !p \/ (_ /\ !p) --> !p
+absorptionTH changed ((Not (Variable p))            `Or` (_ `And` (Not (Variable p')))) | p == p' = do 
+    writeSTRef changed True
+    pure (iNot (iVariable p)) 
+
+-- (!p /\ _) \/ !p --> !p
+absorptionTH changed (((Not (Variable p')) `And` _) `Or` (Not (Variable p)))           | p == p' = do 
+    writeSTRef changed True
+    pure (iNot (iVariable p)) 
+
+-- (_ /\ !p) \/ !p --> !p
+absorptionTH changed ((_ `And` (Not (Variable p'))) `Or` (Not (Variable p)))           | p == p' = do 
     writeSTRef changed True
     pure (iNot (iVariable p)) 
 

@@ -9,6 +9,7 @@ cabal-version: 1.12
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 -- hash: 3030f2d08aac139a7b3266d0c6d4b6bc020923d33d1fb978ce99876c8217c125
 =======
 -- hash: fa6d14ba7acca3c69f0ef6fda13edb17073c7e00b7cc2f5a5a48f51154d538ad
@@ -25,6 +26,9 @@ cabal-version: 1.12
 =======
 -- hash: 358c645bdfdd65657364d8f35c8e3eb16744ce785cfcc045478730fbfcf6d748
 >>>>>>> 5cc6ce1... fixed wild patterns and match recursion
+=======
+-- hash: 2bb7e88e52aea2d12b48de999c231adc8487b2e23c35af9dd6809f9e244a56af
+>>>>>>> c4ce50d... added infix patterns and expanded absorptionTH example
 
 name:           molecular-ast
 version:        0.1.0.0
@@ -48,6 +52,7 @@ source-repository head
 library
   exposed-modules:
       Atoms.Chemistry.Cascades.PropCalc.Absorption
+      Atoms.Chemistry.Cascades.PropCalc.Absorption_TH
       Atoms.Chemistry.Cascades.PropCalc.Contradiction
       Atoms.Chemistry.Cascades.PropCalc.DeMorgan
       Atoms.Chemistry.Cascades.PropCalc.DistributeOrsOverAnds
