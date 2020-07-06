@@ -224,6 +224,7 @@ templateCaseTree t c@(CaseExp bv tr) = do
   (node, topv) <- topBoundVar bv
   ct <- case addDefaultToGuardedBodies (defaultCase node) (promotePatterns bv c (defaultCase node)) of
           e@(CaseExp _ tr) -> inCaseTree t tr
+--          e@(CaseExp _ tr) -> inCaseTree t (trace (prettyCaseTree 0 e) tr)
           _ -> error "templateCaseTree."
   pure (topv, ct)
 templateCaseTree _ _ = error "templateCaseTree"
@@ -247,6 +248,7 @@ inCaseTree t [CaseExp bv tr] =  do
   pure (NormalB (CaseE (VarE res) matches)) 
 inCaseTree t [CaseBody [bod]] = pure bod 
 inCaseTree t [CaseMatch WildP _ [CaseExp _ [p@(ProofExp _ _ _ _)]]] = inCaseTree t [p] 
+inCaseTree _ [CaseMatch WildP _ [CaseBody [bod]]] = pure bod
 inCaseTree _ e = error $ "inCaseTree: unexpected" ++ show e
 
 prettyCaseTree ind (ProofExp c b trs trf) =

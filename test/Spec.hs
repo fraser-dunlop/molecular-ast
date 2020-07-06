@@ -101,6 +101,7 @@ import System.IO (hFlush, stdout)
 
 import qualified Atoms.Chemistry.Utils.TH as ATH
 
+import Test.Atoms.Chemistry.Transformations.Absorption
 
 type SimpleMoleculeP = (Insert Parens SimpleMolecule)
 
@@ -208,6 +209,8 @@ reduction molecule =
 
 main :: IO ()
 main = do
+    testAbsorption
+    error ""
     void $ sequence $ replicate 1000 $ do
         putStrLn "random generating"
         gend <- genTest     
