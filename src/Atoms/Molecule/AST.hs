@@ -12,7 +12,7 @@ import Data.Data
 -- e.g. Molecule (VariantF atoms) h
 data Molecule g h where
   Molecule :: g (h :# Molecule g) -> Molecule g h
-  deriving (Generic, Data)
+  deriving (Generic)
 
 makeHTraversableAndBases ''Molecule
 

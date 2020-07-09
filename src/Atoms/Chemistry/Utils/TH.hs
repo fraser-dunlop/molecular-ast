@@ -29,6 +29,11 @@ import Data.Char (toUpper)
 import Data.List (isPrefixOf,transpose)
 import Debug.Trace 
 
+
+import Atoms.Elements.Generic.Variable
+import Atoms.Elements.PropCalc.And
+import Atoms.Elements.PropCalc.Or
+
 transformation :: QuasiQuoter
 transformation = QuasiQuoter { 
     quoteExp  = error "transformation is not an Exp quoter",
@@ -231,3 +236,69 @@ fullNameAtoms (a:as) = do
         then pure (lo:ren)
         else pure ren
  
+
+
+class ( HasF And t
+      , HasF Variable t
+      , HasF Or t
+      , ForAllIn Functor t
+      , ForAllIn Foldable t
+      , ForAllIn Traversable t
+      , Follow (Locate And t) t ~ And
+      , FromSides (Locate And t)
+      , Follow (Locate Variable t) t ~ Variable
+      , FromSides (Locate Variable t)
+      , Follow (Locate Or t) t ~ Or 
+      , FromSides (Locate Or t)
+      ) => Absorption' t where
+    absorption' :: STRef s Bool
+               -> VariantF t (Pure # Molecule (VariantF t))
+               -> ST s (Pure # Molecule (VariantF t))
+
+
+printSynTH :: IO ()
+printSynTH = do
+  decs <- runQ [d|
+
+    instance forall t . ( HasF And t
+             , HasF Variable t
+             , HasF Or t
+             , ForAllIn Functor t
+             , ForAllIn Foldable t
+             , ForAllIn Traversable t
+             , Follow (Locate And t) t ~ And
+             , FromSides (Locate And t)
+             , Follow (Locate Variable t) t ~ Variable
+             , FromSides (Locate Variable t)
+             , Follow (Locate Or t) t ~ Or 
+             , FromSides (Locate Or t)
+             ) => Absorption' t where
+        absorption' changed v@(VariantF tag res) =
+           let r = maysum [case testEquality tag (fromSides @(Locate And t)) of
+                             Just Refl ->
+                               case res of
+                                 And (Pure (Molecule l@(VariantF tagl resl))) (Pure (Molecule r@(VariantF tagr resr))) -> Just (Pure (Molecule v))
+                             _ -> Nothing
+                           ,case testEquality tag (fromSides @(Locate And t)) of
+                             Just Refl ->
+                               case res of
+                                 And (Pure (Molecule l@(VariantF tagl resl))) (Pure (Molecule r@(VariantF tagr resr))) -> Just (Pure (Molecule v))
+                             _ -> Nothing
+                           ]
+             in case r of
+                   Nothing -> pure $ Pure (Molecule v)
+                   Just mo -> do
+                     writeSTRef changed True
+                     pure mo
+          where 
+            maysum :: [Maybe a] -> Maybe a
+            maysum [] = Nothing
+            maysum ((Just a):_) = Just a
+            maysum (Nothing:rest) = maysum rest
+    
+    
+
+
+    |]
+  print decs
+  error "done"

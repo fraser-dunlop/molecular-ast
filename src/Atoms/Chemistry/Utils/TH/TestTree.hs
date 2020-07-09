@@ -29,21 +29,15 @@ patToPattern WildP = Wild
 patToPattern (VarP nm) = Var nm
 patToPattern _ = error $ "this template does not support that pattern fragment" 
 
-buildTestTree :: [Pattern] -> Test
+buildTestTree :: [Pattern] -> [Test]
 buildTestTree pats = do
-  let bindVars = \t -> foldl (\a b -> b a) t (addBinds <$> pats)
   case redundantPatterns pats of
     [] ->
-      let ut = bindVars
-             $ pruneDeadBranches
-             $ flattenTTests 
-             $ unifyTestList (((\(i,v,p) -> testTree i v p)
-            <$> (zip3 [1..] (cycle [[]]) pats)))
-          matches = runTest ut <$> pats
-          bindsof = binds <$> pats
-      in if all id (zipWith (==) (Just <$> [1..]) ((fst <$>) <$> matches))
-           then trace "All patterns mapped to correct bodies" ut 
-           else error "Some pattern was not mapped to the correct body"
+      let ut = (\(i,v,p) -> addBinds p (pruneDeadBranches $ flattenTTests $ testTree i v p))
+            <$> (zip3 [1..] (cycle [[]]) pats)
+
+
+      in trace (unlines (show <$> ut)) ut
     r -> error $ "redundant patterns\n" ++ (unlines (show <$> r))
 
 
@@ -54,7 +48,7 @@ res :: [Int] -> Name
 res patindx = mkName ("res" ++ (intercalate "_" (show <$> patindx)))
 
 isBoundAsVariantF :: [Int] -> Test -> Bool
-isBoundAsVariantF z (Test pth _ s f) =
+isBoundAsVariantF z (Test pth _ _ s f) =
    z == pth || isBoundAsVariantF z s || isBoundAsVariantF z f 
 isBoundAsVariantF z (Capture _ _ t) = isBoundAsVariantF z t 
 isBoundAsVariantF _ _ = False
@@ -80,13 +74,54 @@ instance Builder (Reader TestBuilder) where
       Nothing -> error "insertBody: not found"
       Just bo -> pure bo
 
-writeTestTree :: Name -> Name -> Name -> [Name] -> [(Int,Body)] -> Test -> Q [Dec]
+writeTestTree :: Name -> Name -> Name -> [Name] -> [(Int,Body)] -> [Test] -> Q [Dec]
 writeTestTree funname chname tyvar tnms bodies ct = do 
   node <- newName "node"
+  msmn <- newName "maysum"
+  msmm <- maysum msmn
   let builder = (TestBuilder node tyvar bodies)
       varbind = runReader (topBoundVar tnms) builder 
-      body    = runReader (templateTest ct) builder
-  pure [FunD funname [Clause [VarP chname , varbind] body []]]
+      cases  = runReader (sequence (templateTest <$> ct)) builder
+  body <- sumbodies node chname msmn cases
+  pure [FunD funname [Clause [VarP chname , varbind] body msmm]]
+
+unwrapNormalBs :: [Either Body Body] -> [Exp]
+unwrapNormalBs [] = []
+unwrapNormalBs ((Right (NormalB e)):rest) = e:(unwrapNormalBs rest)
+unwrapNormalBs e = error "this should never happen. normal bodies only at top level"
+
+sumbodies :: Name -> Name -> Name -> [Either Body Body] -> Q Body
+sumbodies topnode changed maysumnm bods = do
+  let es = unwrapNormalBs bods 
+  res <- newName "res"
+  so <- newName "so"
+  pure (NormalB (CaseE (AppE (VarE maysumnm) (ListE es))
+           [Match (ConP (mkName "Nothing") [])
+               (NormalB (InfixE (Just (VarE (mkName "pure")))
+                                      (VarE (mkName "$"))
+                                (Just (AppE (ConE (mkName "Pure")) 
+                                      (AppE (ConE (mkName "Molecule"))
+                                            (VarE topnode)))))) []
+           ,Match (ConP (mkName "Just") [VarP so])
+              (NormalB (DoE [NoBindS (AppE (AppE (VarE (mkName "writeSTRef"))
+                       (VarE changed)) (ConE (mkName "True")))
+                            ,NoBindS (AppE (VarE (mkName "pure")) (VarE so))])) []]))
+
+maysum :: Name -> Q [Dec]
+maysum nm = do
+   a <- newName "a"
+   v <- newName "v"
+   r <- newName "r"
+   pure [
+      SigD nm (AppT (AppT ArrowT (AppT ListT (AppT (ConT (mkName "Maybe")) (VarT a))))
+              (AppT (ConT (mkName "Maybe")) (VarT a)))
+     ,FunD nm [Clause [ConP (mkName "[]") []] (NormalB (ConE (mkName "Nothing"))) []
+              ,Clause [InfixP (ConP (mkName "Just") [VarP v]) (mkName ":") WildP]
+                   (NormalB (AppE (ConE (mkName "Just")) (VarE v))) []
+              ,Clause [InfixP (ConP (mkName "Nothing") []) (mkName ":") (VarP r)]
+                    (NormalB (AppE (VarE nm) (VarE r))) []
+              ]
+     ]
 
 
 buildTransformer :: Name -> Name -> Name -> [(Pat,Body)] -> Q [Dec]
@@ -95,8 +130,8 @@ buildTransformer funname chname tyvar patbods = do
       unnamedpats = unwrapTopNodeBindings <$> (fst <$> patbods)
       topnames = nub (sort (join (snd <$> unnamedpats)))
       patterns = patToPattern <$> (fst <$> unnamedpats)
-      test = buildTestTree patterns
-  writeTestTree funname chname tyvar topnames (trace (show bodymap) bodymap) (trace (show test) test)
+      tests = buildTestTree patterns
+  writeTestTree funname chname tyvar topnames (trace (show bodymap) bodymap) (trace (show tests) tests)
 
 topBoundVar :: Builder m => [Name] -> m Pat
 topBoundVar [] = do
@@ -106,11 +141,11 @@ topBoundVar (h:t) = AsP h <$> topBoundVar t
 
 unwrapCaptures :: Test -> (Test, [([Int],Name)])
 unwrapCaptures (Capture z n t) = ((z,n):) <$> unwrapCaptures t
-unwrapCaptures t@(Test _ _ s f) = (t, snd (unwrapCaptures s))
+unwrapCaptures t@(Test _ _ _ s f) = (t, snd (unwrapCaptures s))
 unwrapCaptures e = (e, []) 
 
 testsInside :: Int -> Test -> [[Int]]
-testsInside len (Test p _ s f) =
+testsInside len (Test p _ _ s f) =
   if length p == len
     then p:(testsInside len s ++ testsInside len f)
     else testsInside len s ++ testsInside len f
@@ -121,18 +156,20 @@ safeMaximum :: [Int] -> Maybe Int
 safeMaximum [] = Nothing
 safeMaximum l = Just $ maximum l
 
-buildMatchArgs :: [([Int],Name)] -> [[Int]] -> [Pat]
-buildMatchArgs captures subtests =
+buildMatchArgs :: Int -> [Int] -> [([Int],Name)] -> [[Int]] -> [Pat]
+buildMatchArgs numargs pth captures subtests =
   let subtested = zip ((head . reverse) <$> subtests) subtests
       captured  = zip ((\(z,n) -> head (reverse z)) <$> captures) captures
-      numargs   = safeMaximum ((fst <$> subtested) ++ (fst <$> captured))
    in case numargs of 
-        Nothing -> []
-        Just so -> buildArg subtested captured <$> [0..so]
+        0 -> []
+        _ -> buildArg subtested captured <$> [0..(numargs -1)]
   where buildArg :: [(Int, [Int])] -> [(Int, ([Int], Name))] -> Int -> Pat
         buildArg s c i = 
           case (lookup i s, snd <$> (snd <$> (filter ((==i) . fst) c))) of
-             (Nothing, []) -> error "buildArg"
+             (Nothing, []) -> (ConP (mkName "Pure")
+                                     [ ConP (mkName "Molecule") 
+                                     [ ConP (mkName "VariantF") 
+                                     [VarP (tag (pth ++ [i])), VarP (res (pth ++ [i]))]]])
              (Just ac, []) -> (ConP (mkName "Pure")
                                      [ ConP (mkName "Molecule") 
                                      [ ConP (mkName "VariantF") 
@@ -149,36 +186,46 @@ asPs (h:t) = AsP h . (asPs t)
 
 
 templateMatch :: Builder m
-              => [Int] -> Name -> [([Int], Name)] -> [[Int]] -> Body -> m Body
-templateMatch pth con captures subtests body = 
+              => Int -> [Int] -> Name -> [([Int], Name)] -> [[Int]] -> Either Body Body -> m Body
+templateMatch i pth con captures subtests (Right body) = 
   pure (NormalB (CaseE (VarE (res pth))
-          [Match (ConP con (buildMatchArgs captures subtests)) body []]))
+          [Match (ConP con (buildMatchArgs i pth captures subtests)) body []]))
+templateMatch i pth con captures subtests (Left body) = 
+  pure (NormalB (CaseE (VarE (res pth))
+          [Match (ConP con (buildMatchArgs i pth captures subtests)) body []
+          ,Match WildP (NormalB (ConE (mkName "Nothing"))) [] 
+          ]))
 
-templateTest :: Builder m => Test -> m Body
+
+templateTest :: Builder m => Test -> m (Either Body Body)
 templateTest t =
   case unwrapCaptures t of
-    (Test pth cnm s f, capt) -> do
+    (Test pth cnm i s f, capt) -> do
       let z = (length pth) + 1
           inside = filter (\p -> pth `isPrefixOf` p) (testsInside z s)
           captsof = filter (\c -> length (fst c) == z && pth `isPrefixOf` (fst c)) capt
       tnm <- typeName
-      succBranch <- templateMatch pth cnm captsof inside =<< templateTest s
+      succBranch <- templateMatch i pth cnm captsof inside =<< templateTest s
       failBranch <- templateTest f 
-      pure (NormalB (CaseE (AppE (AppE (VarE (mkName "testEquality")) (VarE (tag pth))) 
-                           (AppTypeE (VarE (mkName "fromSides")) 
-                           (AppT (AppT (ConT (mkName "Locate")) (ConT cnm)) (VarT tnm))))
-                   [Match (ConP (mkName "Just") [ConP (mkName "Refl") []]) succBranch []
-                   ,Match WildP failBranch []
-                   ]
-             ))
+      case failBranch of
+         Right failBranchNorm ->
+             pure $ Right (NormalB (CaseE (AppE (AppE (VarE (mkName "testEquality")) 
+                                                   (VarE (tag pth))) 
+                                  (AppTypeE (VarE (mkName "fromSides")) 
+                                  (AppT (AppT (ConT (mkName "Locate")) (ConT cnm)) 
+                                                          (VarT tnm))))
+                          [Match (ConP (mkName "Just") [ConP (mkName "Refl") []])
+                                                  succBranch []
+                          ,Match WildP failBranchNorm []
+                          ]
+                    ))
+         _ -> error "this should never happen"
     (Accept [b], _) -> do
-      insertBody b
-    (Accept [], []) -> do 
-      top <- topNodeName
-      pure (NormalB (AppE (VarE (mkName "pure"))
-                    (AppE (ConE (mkName "Pure"))
-                    (AppE (ConE (mkName "Molecule"))
-                    (VarE top)))))
+      bod <- insertBody b 
+      case bod of
+         GuardedB _ -> pure $ Left bod
+         _ -> pure $ Right bod
+    (Accept [], []) -> pure $ Right (NormalB (ConE (mkName "Nothing")))
     e -> error (show e)
 
 
@@ -207,17 +254,11 @@ binds p = [ v | Var v <- universe p] ++ [ v | As v _ <- universe p]
 --                 |    |       |     |
 --                 |    |       |
 --                 v    V       v     v
-data Test = Test [Int] Name Test Test 
+data Test = Test [Int] Name Int Test Test 
           | TTest [Test] 
           | Capture [Int] Name Test -- Int is a path into a pattern
           | Accept [Int] --Int is a Body tag
   deriving ( Show, Eq)
-
-testSize :: Test -> Int
-testSize (Test _ _ s f) = 1 + testSize s + testSize f
-testSize (TTest tests) = sum (testSize <$> tests)
-testSize (Capture _ _ t) = testSize t
-testSize _ = 0
 
 joinAllOrNothing :: Eq a => [Maybe [a]] -> Maybe [a]
 joinAllOrNothing ml = if any (==Nothing) ml then Nothing else Just (join (catMaybes ml))        
@@ -257,7 +298,7 @@ boundAtT p pth = (\(v, p) -> Capture p v) <$> boundAt p pth
 -- | TODO return Left with error of bindings clash
 runTest :: Test -> Pattern -> Maybe (Int,[Name])
 runTest (Capture pth v t) p =((v:) <$>) <$> runTest t p
-runTest (Test pth t s f) p =
+runTest (Test pth t _ s f) p =
   case indexPatternC p pth of
     Nothing -> runTest f p
     Just so -> if so == t then runTest s p else runTest f p
@@ -266,84 +307,59 @@ runTest _ _ = Nothing
 
 addBinds :: Pattern -> Test -> Test
 addBinds p (Capture i c t) = Capture i c (addBinds p t)
-addBinds p (Test pth t s f) = 
+addBinds p (Test pth t i s f) = 
   case indexPatternC p pth of
-    Nothing -> Test pth t s (addBinds p f)
+    Nothing -> Test pth t i s (addBinds p f)
     Just so -> if so == t 
-                 then Test pth t (foldl (\a b -> b a) (addBinds p s) (boundAtT p pth)) f
-                  else Test pth t s (addBinds p f)
+                 then Test pth t i (foldl (\a b -> b a) (addBinds p s) (boundAtT p pth)) f
+                  else Test pth t i s (addBinds p f)
 addBinds _ e = e
 
 testTree :: Int -> [Int] -> Pattern -> Test
-testTree i pth (Con c []) = Test pth c (Accept [i]) (Accept [])
-testTree i pth (Con c [inner]) = Test pth c (testTree i (pth ++ [0]) inner) (Accept [])
+testTree i pth (Con c []) = Test pth c 0 (Accept [i]) (Accept [])
+testTree i pth (Con c [inner]) = Test pth c 1 (testTree i (pth ++ [0]) inner) (Accept [])
 testTree i pth (Con c inners) =
-   Test pth c (TTest (uncurry (testTree i)
+   Test pth c (length inners) (TTest (uncurry (testTree i)
    <$> (zip ((\z -> pth ++ [z]) <$> [0..]) inners))) (Accept [])
 testTree i pth (As _ p) = testTree i pth p
 testTree i pth (Var _) = Accept [i]
 testTree i pth Wild = Accept [i]
 
 
-unifyTests :: Test -> Test -> Test
-unifyTests (Capture pth v tl) tr = Capture pth v (unifyTests tl tr)
-unifyTests tl (Capture pth v tr) = Capture pth v (unifyTests tl tr)
-unifyTests (Test i conl sl fl) tr@(Test j conr sr fr)
-    | i == j && conl == conr = Test i conl (unifyTests sl sr) (unifyTests fl fr)
-    | otherwise = Test i conl sl (unifyTests fl tr)
-unifyTests (Test i conl sl fl) tt@(TTest _) = Test i conl sl (unifyTests fl tt) 
-unifyTests tt@(TTest _) (Test i conr sr fr) = Test i conr sr (unifyTests fr tt) 
-unifyTests (TTest ttl) (TTest ttr) =
-   if length ttl /= length ttr
-     then error "patterns do not have the same arity"
-     else TTest (zipWith unifyTests ttl ttr)
-unifyTests (Accept l) (Accept r) = Accept (l ++ r)
-unifyTests a@(Accept _) (Test i c s f) = Test i c s (unifyTests a f)
-unifyTests (Test i c s f) a@(Accept _) = Test i c s (unifyTests a f)
-unifyTests l r = error $ "unify failure\n" ++ (show l) ++ "\n" ++ (show r) 
-
-unifyTestList :: [Test] -> Test
-unifyTestList [] = (Accept []) 
-unifyTestList [s] = s
-unifyTestList l =
-  case sortBy (\a b -> testSize a `compare` testSize b) l of
-    (h:t) -> foldl (\a b -> unifyTests a b) h t
-
-
 flattenTTests :: Test -> Test
 flattenTTests (Capture pth v t) = Capture pth v (flattenTTests t)
-flattenTTests (Test i c s f) = Test i c (flattenTTests s) (flattenTTests f)
+flattenTTests (Test i c nrgs s f) = Test i c nrgs (flattenTTests s) (flattenTTests f)
 flattenTTests (Accept k) = Accept k
 flattenTTests (TTest tsts) = foldTTests tsts
 
 foldTTests :: [Test] -> Test
 foldTTests [] = error ""
 foldTTests [Accept a] = Accept a
-foldTTests [Test i c s f] = Test i c s f
-foldTTests [(h@(Test li lc ls lf)),(n@(Test ri rc rs rf))] =
-    intersectTests (Test li lc (flattenTTests ls) (flattenTTests lf))
-                   (Test ri rc (flattenTTests rs) (flattenTTests rf))
-foldTTests ((Test i c s f):r) =
-    intersectTests (Test i c (flattenTTests s) (flattenTTests f)) (foldTTests r)
+foldTTests [Test i c nrgs s f] = Test i c nrgs s f
+foldTTests [(h@(Test li lc nrgsl ls lf)),(n@(Test ri rc nrgsr rs rf))] =
+    intersectTests (Test li lc nrgsl (flattenTTests ls) (flattenTTests lf))
+                   (Test ri rc nrgsr (flattenTTests rs) (flattenTTests rf))
+foldTTests ((Test i c nrgs s f):r) =
+    intersectTests (Test i c nrgs (flattenTTests s) (flattenTTests f)) (foldTTests r)
+foldTTests ((Accept as):t:r) = foldTTests ((applyTestIntersect as t):r)
 foldTTests e = error (show e)
 
 applyTestIntersect :: [Int] -> Test -> Test
-applyTestIntersect with (Test i c s f) = Test i c (applyTestIntersect with s)
-                                                  (applyTestIntersect with f) 
+applyTestIntersect with (Test i c n s f) = Test i c n (applyTestIntersect with s)
+                                                      (applyTestIntersect with f) 
 applyTestIntersect with (Accept r) = Accept (with `intersect` r)
 applyTestIntersect with (Capture pth c t) = Capture pth c (applyTestIntersect with t)
 applyTestIntersect with (TTest tsts) = TTest (applyTestIntersect with <$> tsts)
 
 intersectTests :: Test -> Test -> Test
-intersectTests (Test i c s f) t = Test i c (intersectTests s t) (intersectTests f t)
+intersectTests (Test i c n s f) t = Test i c n (intersectTests s t) (intersectTests f t)
 intersectTests (Capture pth s i) t = Capture pth s (intersectTests i t)
-intersectTests (Accept []) t = t
 intersectTests (Accept a) t = applyTestIntersect a t
 
 testAccepts :: Test -> [Int]
 testAccepts (Accept a) = a
 testAccepts (Capture _ _ t) = testAccepts t
-testAccepts (Test _ _ s f) = testAccepts s ++ testAccepts f
+testAccepts (Test _ _ _ s f) = testAccepts s ++ testAccepts f
 testAccepts (TTest tsts) = join (testAccepts <$> tsts)
 
 pruneDeadBranches :: Test -> Test
@@ -352,10 +368,10 @@ pruneDeadBranches t =
         [] -> Accept [] 
         _ -> case t of
                Accept a -> Accept a
-               Test i c s f ->
+               Test i c n s f ->
                   case testAccepts s of
                     [] -> pruneDeadBranches f
-                    _ -> Test i c (pruneDeadBranches s) (pruneDeadBranches f)
+                    _ -> Test i c n (pruneDeadBranches s) (pruneDeadBranches f)
                Capture pth s t -> Capture pth s (pruneDeadBranches t)
                TTest tsts -> TTest (filter (/= (Accept [])) (pruneDeadBranches <$> tsts))
 

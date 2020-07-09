@@ -14,6 +14,7 @@ import Type.Set.VariantF
 import Data.STRef
 import Control.Monad.ST
 
+
 -- Absorption 
 -- p /\ (p \/ _) == p
 -- p /\ (_ \/ p) == p
@@ -37,6 +38,61 @@ import Control.Monad.ST
 -- guards are turned into if else blocks
 -- constructors of outputs are wrapped in VariantFs -- MakePure class?
 -- 
+
+class ( HasF And t
+      , HasF Variable t
+      , HasF Or t
+      , ForAllIn Functor t
+      , ForAllIn Foldable t
+      , ForAllIn Traversable t
+      , Follow (Locate And t) t ~ And
+      , FromSides (Locate And t)
+      , Follow (Locate Variable t) t ~ Variable
+      , FromSides (Locate Variable t)
+      , Follow (Locate Or t) t ~ Or 
+      , FromSides (Locate Or t)
+      ) => Absorption' t where
+    absorption' :: STRef s Bool
+               -> VariantF t (Pure # Molecule (VariantF t))
+               -> ST s (Pure # Molecule (VariantF t))
+
+
+instance ( HasF And t
+         , HasF Variable t
+         , HasF Or t
+         , ForAllIn Functor t
+         , ForAllIn Foldable t
+         , ForAllIn Traversable t
+         , Follow (Locate And t) t ~ And
+         , FromSides (Locate And t)
+         , Follow (Locate Variable t) t ~ Variable
+         , FromSides (Locate Variable t)
+         , Follow (Locate Or t) t ~ Or 
+         , FromSides (Locate Or t)
+         ) => Absorption' t where
+    absorption' changed v@(VariantF tag res) =
+       let r = maysum [case testEquality tag (fromSides @(Locate And t)) of
+                         Just Refl ->
+                           case res of
+                             And (Pure (Molecule l@(VariantF tagl resl))) (Pure (Molecule r@(VariantF tagr resr))) -> Just (Pure (Molecule v))
+                         _ -> Nothing
+                       ,case testEquality tag (fromSides @(Locate And t)) of
+                         Just Refl ->
+                           case res of
+                             And (Pure (Molecule l@(VariantF tagl resl))) (Pure (Molecule r@(VariantF tagr resr))) -> Just (Pure (Molecule v))
+                         _ -> Nothing
+                       ]
+         in case r of
+               Nothing -> pure $ Pure (Molecule v)
+               Just mo -> do
+                 writeSTRef changed True
+                 pure mo
+      where 
+        maysum :: [Maybe a] -> Maybe a
+        maysum [] = Nothing
+        maysum ((Just a):_) = Just a
+        maysum (Nothing:rest) = maysum rest
+
 
 class ( HasF And t
       , HasF Variable t
