@@ -1,16 +1,18 @@
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE TemplateHaskell      #-}
+{-# LANGUAGE DeriveDataTypeable   #-}
 module Atoms.Molecule.AST where 
 import Hyper
 import Hyper.TH.Traversable
 import Type.Set.Variant
 import Type.Set.VariantF
-
+import Data.Data
 
 -- | A Molecule is an AST composed from a set of Atoms
 -- e.g. Molecule (VariantF atoms) h
 data Molecule g h where
-  Molecule :: (Functor g) => g (h :# Molecule g) -> Molecule g h
+  Molecule :: g (h :# Molecule g) -> Molecule g h
+  deriving (Generic, Data)
 
 makeHTraversableAndBases ''Molecule
 

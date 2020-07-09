@@ -38,6 +38,6 @@ someTransformation changed (And (Variable e) (Variable f)) =
        then pure ((iAnd (iNot (iVariable e)) (iVariable f)))
        else pure ((iAnd (iNot (iVariable f)) (iVariable e)))
 
-someTransformation changed x = y
+someTransformation changed x = pure (Pure (Molecule x))
 
 |]

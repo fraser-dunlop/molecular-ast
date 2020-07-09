@@ -3,7 +3,7 @@
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE FlexibleInstances    #-}
 module Atoms.Chemistry.Utils.TH where
-import Atoms.Chemistry.Utils.TH.CaseTree
+import Atoms.Chemistry.Utils.TH.TestTree
 import Language.Haskell.TH
 import Atoms.Elements.PropCalc.Not
 import Atoms.Molecule.AST
@@ -58,22 +58,11 @@ parseTransformation dsl = do
           fundeps = []
           sigdecs = makeSig funname threadnm tyvar          
           patbods = hardError $ extractPatBodyPairs $ head pa
-      fundecs <- buildTransformer funname chname tyvar patbods 
+      npatbods <- sequence (renamePatBod <$> patbods)
+      fundecs <- buildTransformer funname chname tyvar npatbods 
       pure [ClassD (mkCtx fullats tyvar) classname [PlainTV tyvar] fundeps sigdecs
            ,InstanceD Nothing (mkCtx fullats tyvar) (AppT (ConT classname) (VarT tyvar)) fundecs
            ]
-
-
-
-buildTransformer :: Name -> Name -> Name -> [(Pat,Body)] -> Q [Dec]
-buildTransformer funname chname tyvar patbods = do
-  ct <- buildCaseTree patbods
-  writeCaseTree funname chname tyvar ct
-
-writeCaseTree :: Name -> Name -> Name -> CaseTree [Body] -> Q [Dec]
-writeCaseTree funname chname tyvar ct = do 
-  (varbind, body) <- templateCaseTree tyvar ct 
-  pure [FunD funname [Clause [VarP chname , varbind] body []]]
 
 
 makeHasF :: Name -> Name -> Type 
@@ -167,6 +156,43 @@ extractAtomsClause (Clause _ _ _)         = Left "This template does not support
 extractAtomsPat :: Pat -> [Name]
 extractAtomsPat p = [ nm | ConP nm _ <- universe p] ++ [ nm | UInfixP _ nm _ <- universe p]
 
+extractVarBindsPat :: Pat -> [Name]
+extractVarBindsPat p =
+   sort $ nub $ [ nm | VarP nm <- universe p] ++ [ nm | AsP nm _ <- universe p]
+
+renamePatBod :: (Pat,Body) -> Q (Pat,Body)
+renamePatBod (pat, bod) = do
+  let varbinds = extractVarBindsPat pat
+  newnames <- sequence ((\p -> (p,) <$> newName "var") <$> (trace (show varbinds) varbinds))
+  pure (renamePat newnames pat, renameBody newnames bod)
+ 
+renamePat :: [(Name,Name)] -> (Pat -> Pat)
+renamePat nms = transform (\e -> case e of
+                                   VarP m -> case lookup m nms of
+                                               Nothing -> VarP m
+                                               Just n -> VarP n
+                                   AsP m p -> case lookup m nms of
+                                               Nothing -> AsP m p
+                                               Just n -> AsP n p
+                                   _ -> e) 
+
+renameExp :: [(Name,Name)] -> (Exp -> Exp)
+renameExp nms = transform (\e -> case e of
+                                   VarE m -> case lookup m nms of
+                                               Nothing -> VarE m
+                                               Just n -> VarE n
+                                   _ -> e)
+
+renameBody :: [(Name,Name)] -> (Body -> Body)
+renameBody nms = \b -> case b of
+                         (NormalB e) -> NormalB (renameExp nms e)
+                         (GuardedB gexps) -> GuardedB
+                            ((\(g,e) -> (renameGuard nms g, renameExp nms e)) <$> gexps)
+
+renameGuard :: [(Name,Name)] -> (Guard -> Guard)
+renameGuard nms = \g -> case g of
+                          (NormalG e) -> NormalG (renameExp nms e)
+                          (PatG stmts) -> error "pattern guards not supported yet"
 
 extractAtomsBody :: Body -> [Name]
 extractAtomsBody (NormalB exp) = extractAtomsExp exp 

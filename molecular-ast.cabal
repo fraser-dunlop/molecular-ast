@@ -11,6 +11,7 @@ cabal-version: 1.12
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 -- hash: 3030f2d08aac139a7b3266d0c6d4b6bc020923d33d1fb978ce99876c8217c125
 =======
 -- hash: fa6d14ba7acca3c69f0ef6fda13edb17073c7e00b7cc2f5a5a48f51154d538ad
@@ -33,6 +34,9 @@ cabal-version: 1.12
 =======
 -- hash: d7f9c585997ce1570b200ea1925fae8898b145055dfd0689db595af344a10c79
 >>>>>>> 6a2dd7b... codegen too buggy - will replace with correct implementation
+=======
+-- hash: 204c91a4dc0965a278ac8b51cfcb4be41a763230889c627f70b67aeba98b2d03
+>>>>>>> 4fb3801... more failed experimentation
 
 name:           molecular-ast
 version:        0.1.0.0
@@ -92,6 +96,7 @@ library
       Atoms.Chemistry.Utils.FixedPoint
       Atoms.Chemistry.Utils.TH
       Atoms.Chemistry.Utils.TH.CaseTree
+      Atoms.Chemistry.Utils.TH.TestTree
       Atoms.Chemistry.Utils.TH_test
       Atoms.Elements.CNF.Conjunction
       Atoms.Elements.CNF.Disjunction
