@@ -12,13 +12,13 @@ import Type.Set.Variant
 import Type.Set.VariantF
 
 class Contradiction t => ContradictionCascades t where
-    contradictionEliminationFixed :: (Pure # Molecule (VariantF t))
+    contradictionFixed :: (Pure # Molecule (VariantF t))
                         -> ((Bool, Int), (Pure # Molecule (VariantF t)))
 
 
 
 instance Contradiction t => ContradictionCascades t where
-    contradictionEliminationFixed molecule =
-        fixedPointCounted contradictionElimination molecule
+    contradictionFixed molecule =
+        fixedPointCounted contradiction molecule
 
 

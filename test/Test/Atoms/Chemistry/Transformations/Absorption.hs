@@ -3,7 +3,7 @@
 module Test.Atoms.Chemistry.Transformations.Absorption
   ( testAbsorption
   ) where
-import Atoms.Chemistry.Cascades.PropCalc.Absorption_TH
+import Atoms.Chemistry.Cascades.PropCalc.Absorption
 import Atoms.Chemistry.Reductions.RemoveParens
 import Atoms.Elements.Generic.Parens
 import Atoms.Elements.Generic.Type
@@ -58,7 +58,7 @@ absorptionTest (input, expected) = do
          return False
       Right ast -> do
          let (_,ast_without_parens :: (Pure # Molecule (VariantF Absorbable))) = removeParens ast
-         let (_,res) = absorptionTHFixed ast_without_parens
+         let (_,res) = absorptionFixed ast_without_parens
          let output = pack (Pretty.render (pPrint res))
          if output == expected 
            then return True 

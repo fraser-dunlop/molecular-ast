@@ -12,13 +12,13 @@ import Type.Set.Variant
 import Type.Set.VariantF
 
 class Tautology t => TautologyCascades t where
-    tautologyEliminationFixed :: (Pure # Molecule (VariantF t))
+    tautologyFixed :: (Pure # Molecule (VariantF t))
                         -> ((Bool, Int), (Pure # Molecule (VariantF t)))
 
 
 
 instance Tautology t => TautologyCascades t where
-    tautologyEliminationFixed molecule =
-        fixedPointCounted tautologyElimination molecule
+    tautologyFixed molecule =
+        fixedPointCounted tautology molecule
 
 

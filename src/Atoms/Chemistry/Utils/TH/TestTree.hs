@@ -12,9 +12,6 @@ import Data.List ( sortBy, intersect, intercalate, sort, nub, isPrefixOf )
 import Data.Maybe ( catMaybes )
 import Language.Haskell.TH 
 
-import Debug.Trace
-
-
 unwrapTopNodeBindings :: Pat -> (Pat, [Name])
 unwrapTopNodeBindings (AsP nm p) = (nm:) <$> unwrapTopNodeBindings p
 unwrapTopNodeBindings (VarP nm) = (VarP nm, [nm])
@@ -33,11 +30,12 @@ buildTestTree :: [Pattern] -> [Test]
 buildTestTree pats = do
   case redundantPatterns pats of
     [] ->
-      let ut = (\(i,v,p) -> addBinds p (pruneDeadBranches $ flattenTTests $ testTree i v p))
+      --TODO flattenTTests fixed point
+      let ut = (\(i,v,p) -> addBinds p (pruneDeadBranches $ flattenTTests $ flattenTTests $ testTree i v p))
             <$> (zip3 [1..] (cycle [[]]) pats)
 
 
-      in trace (unlines (show <$> ut)) ut
+      in ut
     r -> error $ "redundant patterns\n" ++ (unlines (show <$> r))
 
 
@@ -131,7 +129,7 @@ buildTransformer funname chname tyvar patbods = do
       topnames = nub (sort (join (snd <$> unnamedpats)))
       patterns = patToPattern <$> (fst <$> unnamedpats)
       tests = buildTestTree patterns
-  writeTestTree funname chname tyvar topnames (trace (show bodymap) bodymap) (trace (show tests) tests)
+  writeTestTree funname chname tyvar topnames bodymap tests
 
 topBoundVar :: Builder m => [Name] -> m Pat
 topBoundVar [] = do
@@ -249,14 +247,14 @@ binds :: Pattern -> [Name]
 binds p = [ v | Var v <- universe p] ++ [ v | As v _ <- universe p]
 
 -- |    Type equality tests can pass or fail 
--- they test a path to a        |     |
---                 | constructor|
---                 |    |       |     |
---                 |    |       |
---                 v    V       v     v
+-- they test a path to a         |     |
+--                 | constructor |     |
+--                 |    | arity  |     |
+--                 |    |    |   |     |
+--                 v    V    v   v     v
 data Test = Test [Int] Name Int Test Test 
-          | TTest [Test] 
-          | Capture [Int] Name Test -- Int is a path into a pattern
+          | TTest [Test] -- Constructors with multiple arguments contain TTests 
+          | Capture [Int] Name Test -- [Int] is a path into a pattern
           | Accept [Int] --Int is a Body tag
   deriving ( Show, Eq)
 

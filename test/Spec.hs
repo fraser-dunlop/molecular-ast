@@ -211,7 +211,7 @@ main :: IO ()
 main = do
 
     testAbsorption
-    error ""
+--    error ""
     void $ sequence $ replicate 1000 $ do
         putStrLn "random generating"
         gend <- genTest     
