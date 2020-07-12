@@ -30,8 +30,7 @@ buildTestTree :: [Pattern] -> [Test]
 buildTestTree pats = do
   case redundantPatterns pats of
     [] ->
-      --TODO flattenTTests fixed point
-      let ut = (\(i,v,p) -> addBinds p (pruneDeadBranches $ flattenTTests $ flattenTTests $ testTree i v p))
+      let ut = (\(i,v,p) -> addBinds p (pruneDeadBranches $ flattenTTestsFixed $ testTree i v p))
             <$> (zip3 [1..] (cycle [[]]) pats)
 
 
@@ -292,8 +291,6 @@ boundAt _ _ = error "boundAt"
 boundAtT :: Pattern -> [Int] -> [Test -> Test]
 boundAtT p pth = (\(v, p) -> Capture p v) <$> boundAt p pth 
 
-
--- | TODO return Left with error of bindings clash
 runTest :: Test -> Pattern -> Maybe (Int,[Name])
 runTest (Capture pth v t) p =((v:) <$>) <$> runTest t p
 runTest (Test pth t _ s f) p =
@@ -323,6 +320,12 @@ testTree i pth (As _ p) = testTree i pth p
 testTree i pth (Var _) = Accept [i]
 testTree i pth Wild = Accept [i]
 
+flattenTTestsFixed :: Test -> Test
+flattenTTestsFixed t = 
+  let t' = flattenTTests t
+   in if t' == t
+        then t
+         else flattenTTestsFixed t'
 
 flattenTTests :: Test -> Test
 flattenTTests (Capture pth v t) = Capture pth v (flattenTTests t)
