@@ -13,6 +13,7 @@ cabal-version: 1.12
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 -- hash: 3030f2d08aac139a7b3266d0c6d4b6bc020923d33d1fb978ce99876c8217c125
 =======
 -- hash: fa6d14ba7acca3c69f0ef6fda13edb17073c7e00b7cc2f5a5a48f51154d538ad
@@ -41,6 +42,9 @@ cabal-version: 1.12
 =======
 -- hash: fb337a6d789ce61ef99811926fc8e1f24816f9bf69a754522be73aaa183a31dd
 >>>>>>> 2896f56... conversion to templates
+=======
+-- hash: 86f976eeafef54cae426d0764f345c13fc7c06600879cc1bd1e43a1365d76778
+>>>>>>> cd22860... remove some cruft
 
 name:           molecular-ast
 version:        0.1.0.0
@@ -99,9 +103,7 @@ library
       Atoms.Chemistry.Transformations.PropCalc.Tautology
       Atoms.Chemistry.Utils.FixedPoint
       Atoms.Chemistry.Utils.TH
-      Atoms.Chemistry.Utils.TH.CaseTree
       Atoms.Chemistry.Utils.TH.TestTree
-      Atoms.Chemistry.Utils.TH_test
       Atoms.Elements.CNF.Conjunction
       Atoms.Elements.CNF.Disjunction
       Atoms.Elements.CNF.Flattened
@@ -144,7 +146,6 @@ library
       Atoms.Molecule.Types
       Atoms.Molecule.VarType
       Atoms.Molecule.ZipMatchable
-      Internal.Prelude
   other-modules:
       Paths_molecular_ast
   hs-source-dirs:
