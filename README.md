@@ -1,8 +1,6 @@
 # molecular-ast 
 Define syntax, parser, pretty-printer, random generators, inference, and unification Atomically. Combine Atoms into Molecular ASTs parameterised by the types of Atoms they contain. Compose rewrite systems from Transformations and Reductions that operate over classes of Molecules.
 
-Any chemistry set you design will play nicely with others and be open to extension by pure function composition.
-
 ## Atomically define
 - Parser
 - Pretty Printer
@@ -98,7 +96,7 @@ tautology ((x `Or` (Not (Variable a))) `Or` (Variable b)) | a == b =
   Just (iLitBool True)
 |]
 ```
-to this mostrosity
+to this 
 
 ```Haskell
 class (Type.Set.VariantF.HasF LitBool f_aAb9,
@@ -309,7 +307,7 @@ instance (Type.Set.VariantF.HasF LitBool f_aAb9,
         maysum_aAbn (Nothing : r_aAbq) = maysum_aAbn r_aAbq
 ```
 
-Whilst Template Haskell templating may seem like an ugly hack the templated code is highly generic and the author believes that the benefits of this construction outweigh the costs. Since these rules are so generic testing can be greatly simplified. The rule writer may write tests on tiny Molecules of syntax containing only the fragments relevant to the test. Thus verifying the correctness of a rule can be done in a vaccuum over a universe of very simple cases.
+Whilst templating may seem like an ugly hack the templated code is highly generic and the author believes that the benefits of this construction outweigh the costs. Since these rules are so generic testing can be greatly simplified. The rule writer may write tests on tiny Molecules of syntax containing only the fragments relevant to the test. Thus verifying the correctness of a rule can be done in a vaccuum over a universe of very simple cases.
 
 
 # Further work and known bugs
