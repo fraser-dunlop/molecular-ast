@@ -18,6 +18,73 @@ Define syntax, parser, pretty-printer, random generators, inference, and unifica
 - Atoms.Chemistry.Extractions contains Extraction traversals
 - Atoms.Chemistry.Solutions contains solver plugins for finding solutions to Constraints model Molecules
 
+# What does an Atom look like?
+This is the *Or* atom. It is simply a Functor over h. Hypertypes (alternatively a simpler functor Fix could be employed) and VariantF allow h to be polymorphic over the elements in the molecule to which Or belongs.
+
+```Haskell
+
+data Or h = Or h h  
+  deriving (Eq, Ord, Show, Generic, Foldable, Traversable)
+
+instance Functor Or where
+   fmap f (Or l r) = Or (f l) (f r) 
+
+```
+
+Defining a random generator implementation for *Or* is simple. This is dispatched to from a Molecule generator. A better implementation of Gen1 would allow for a recursion limit.
+
+```Haskell
+instance Gen1 IO Or where
+  liftGen _ = Or <$> gen <*> gen
+
+```
+
+Pretty printing can be defined in a similar manner.
+
+```Haskell
+instance Pretty1 Or where
+    liftPrintPrec prec lPrec lvl p (Or a b) =
+       ((prec lvl p a) <+> Pretty.text "\\/" <+> (prec lvl p b)) & Pretty.parens 
+```
+
+Perhaps surprisingly we can define a parser by atomic dispatch too. The current implementation is very inefficient for large left recursive terms.
+
+```Haskell
+-- Discriminator allows us to ask for an LR or non-LR term
+instance (Ord e) => ASumPrecLR Discriminator (ParsecT e Text m) Or where
+    liftASumPrecLR NotLeftRecursive p = ( minBound, empty )
+    liftASumPrecLR LeftRecursive p =
+      ( 42  -- a precedence for this parser
+      , try $ do
+        l <- p NotLeftRecursive
+        _ <- symbol "\\/" 
+        r <- (try (p NotLeftRecursive)) <|> p LeftRecursive
+        pure $ Or l r
+      )
+```
+
+Inference and unification can also be defined generically and dispatched to the atoms of a molecule.
+
+```Haskell
+instance ( HasF Or g
+         , HasF TypeBool g
+         , ForAllIn Functor g
+         ) => Infer1 m (Molecule (VariantF g)) Or where
+    liftInferBody (Or a b) = do
+       InferredChild aI aT <- inferChild a
+       InferredChild bI bT <- inferChild b
+       expected <- MkANode <$> newTerm (Molecule (toVariantF TypeBool))
+       unify (aT ^. _ANode) (expected ^. _ANode)
+       ((Molecule (toVariantF (Or aI bI)), ) . MkANode) <$> unify (aT ^. _ANode) (bT ^. _ANode)
+
+instance HasTypeConstraints1 g Or where 
+   verifyConstraints1 _ _ = Nothing
+
+instance ZipMatchable1 g Or where
+   zipJoin1 (Or ll rl) (Or lr rr) = Just (Or (ll :*: lr) (rl :*: rr)) 
+
+```
+
 # What do Molecular rewrite rules look like?
 Rewrite rules exist at the class level and operate over categories of trees that satisfy their contraints.
 ```Haskell
