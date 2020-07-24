@@ -63,7 +63,7 @@ instance (Ord e) => ASumPrecLR Discriminator (ParsecT e Text m) Or where
       )
 ```
 
-Inference and unification can also be defined generically and dispatched to the atoms of a molecule.
+Inference and unification can also be defined generically and dispatched to the atoms of a molecule using Hypertypes generic inference and unification machinery.
 
 ```Haskell
 instance ( HasF Or g
