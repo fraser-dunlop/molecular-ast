@@ -79,3 +79,236 @@ doubleNegation (Not (Not a)) = a
 ```
 This Template Haskell Quasi Quoter will template a class and instance named DoubleNegation for us enabling the writing of concise and easy to read rules. The template fills in the default case for us which is no change to the node and updates the STRef parameter in the case of match success. [The transformation quoter supports a subset of Haskell syntax including pattern guards that is repurposed to form this DSL].
 
+
+For rules of moderate complexity Template Haskell becomes necessary for the sanity of the rule writer. Tautology by variable name equality expands from this
+
+```Haskell
+[transformation|
+-- p \/ !p = True
+tautology ((Not (Variable a)) `Or` (Variable b)) | a == b =
+  Just (Pure (Molecule (toVariantF (LitBool True))))
+-- !p \/ p = True 
+tautology ((Variable a) `Or` (Not (Variable b))) | a == b =
+  Just (iLitBool True)
+-- (x \/ !p) \/ p = True
+tautology ((x `Or` (Variable a)) `Or` (Not (Variable b))) | a == b =
+  Just (iLitBool True)
+-- (x \/ p) \/ !p = True
+tautology ((x `Or` (Not (Variable a))) `Or` (Variable b)) | a == b =
+  Just (iLitBool True)
+|]
+```
+to this mostrosity
+
+```Haskell
+class (Type.Set.VariantF.HasF LitBool f_aAb9,
+       Type.Set.VariantF.HasF Not f_aAb9,
+       Type.Set.VariantF.HasF Or f_aAb9,
+       Type.Set.VariantF.HasF Variable f_aAb9,
+       Type.Set.Variant.FromSides (Type.Set.Locate LitBool f_aAb9),
+       Type.Set.Variant.FromSides (Type.Set.Locate Not f_aAb9),
+       Type.Set.Variant.FromSides (Type.Set.Locate Or f_aAb9),
+       Type.Set.Variant.FromSides (Type.Set.Locate Variable f_aAb9),
+       Type.Set.Follow (Type.Set.Locate LitBool f_aAb9) f_aAb9 ~ LitBool,
+       Type.Set.Follow (Type.Set.Locate Not f_aAb9) f_aAb9 ~ Not,
+       Type.Set.Follow (Type.Set.Locate Or f_aAb9) f_aAb9 ~ Or,
+       Type.Set.Follow (Type.Set.Locate Variable f_aAb9) f_aAb9
+       ~ Variable,
+       Type.Set.Variant.ForAllIn Functor f_aAb9,
+       Type.Set.Variant.ForAllIn Foldable f_aAb9,
+       Type.Set.Variant.ForAllIn Traversable f_aAb9) => Tautology f_aAb9 where
+  tautology ::
+    STRef s_aAba Bool
+    -> Type.Set.VariantF.VariantF f_aAb9 ((#) Hyper.Type.Pure.Pure (Atoms.Molecule.AST.Molecule (Type.Set.VariantF.VariantF f_aAb9)))
+       -> ST s_aAba ((#) Hyper.Type.Pure.Pure (Atoms.Molecule.AST.Molecule (Type.Set.VariantF.VariantF f_aAb9)))
+instance (Type.Set.VariantF.HasF LitBool f_aAb9,
+          Type.Set.VariantF.HasF Not f_aAb9,
+          Type.Set.VariantF.HasF Or f_aAb9,
+          Type.Set.VariantF.HasF Variable f_aAb9,
+          Type.Set.Variant.FromSides (Type.Set.Locate LitBool f_aAb9),
+          Type.Set.Variant.FromSides (Type.Set.Locate Not f_aAb9),
+          Type.Set.Variant.FromSides (Type.Set.Locate Or f_aAb9),
+          Type.Set.Variant.FromSides (Type.Set.Locate Variable f_aAb9),
+          Type.Set.Follow (Type.Set.Locate LitBool f_aAb9) f_aAb9 ~ LitBool,
+          Type.Set.Follow (Type.Set.Locate Not f_aAb9) f_aAb9 ~ Not,
+          Type.Set.Follow (Type.Set.Locate Or f_aAb9) f_aAb9 ~ Or,
+          Type.Set.Follow (Type.Set.Locate Variable f_aAb9) f_aAb9
+          ~ Variable,
+          Type.Set.Variant.ForAllIn Functor f_aAb9,
+          Type.Set.Variant.ForAllIn Foldable f_aAb9,
+          Type.Set.Variant.ForAllIn Traversable f_aAb9) =>
+         Tautology f_aAb9 where
+  tautology changed_aAbb node_aAbm@(VariantF tag res)
+    = case
+          maysum_aAbn
+            [case (testEquality tag) (fromSides @(Locate Or f_aAb9)) of
+               Just Refl
+                 -> case res of {
+                      Or (Pure (Molecule (VariantF tag0 res0)))
+                         (Pure (Molecule (VariantF tag1 res1)))
+                        -> case (testEquality tag0) (fromSides @(Locate Not f_aAb9)) of
+                             Just Refl
+                               -> case res0 of {
+                                    Not (Pure (Molecule (VariantF tag0_0 res0_0)))
+                                      -> case
+                                             (testEquality tag0_0)
+                                               (fromSides @(Locate Variable f_aAb9))
+                                         of
+                                           Just Refl
+                                             -> case res0_0 of {
+                                                  Variable var_aAbc
+                                                    -> case
+                                                           (testEquality tag1)
+                                                             (fromSides
+                                                                @(Locate Variable f_aAb9))
+                                                       of
+                                                         Just Refl
+                                                           -> case res1 of
+                                                                Variable var_aAbd
+                                                                  | var_aAbc == var_aAbd
+                                                                  -> Just
+                                                                       (Pure
+                                                                          (Molecule
+                                                                             (toVariantF
+                                                                                (LitBool
+                                                                                   True))))
+                                                                _ -> Nothing
+                                                         _ -> Nothing }
+                                           _ -> Nothing }
+                             _ -> Nothing }
+               _ -> Nothing,
+             case (testEquality tag) (fromSides @(Locate Or f_aAb9)) of
+               Just Refl
+                 -> case res of {
+                      Or (Pure (Molecule (VariantF tag0 res0)))
+                         (Pure (Molecule (VariantF tag1 res1)))
+                        -> case
+                               (testEquality tag0) (fromSides @(Locate Variable f_aAb9))
+                           of
+                             Just Refl
+                               -> case res0 of {
+                                    Variable var_aAbe
+                                      -> case
+                                             (testEquality tag1)
+                                               (fromSides @(Locate Not f_aAb9))
+                                         of
+                                           Just Refl
+                                             -> case res1 of {
+                                                  Not (Pure (Molecule (VariantF tag1_0 res1_0)))
+                                                    -> case
+                                                           (testEquality tag1_0)
+                                                             (fromSides
+                                                                @(Locate Variable f_aAb9))
+                                                       of
+                                                         Just Refl
+                                                           -> case res1_0 of
+                                                                Variable var_aAbf
+                                                                  | var_aAbe == var_aAbf
+                                                                  -> Just (iLitBool True)
+                                                                _ -> Nothing
+                                                         _ -> Nothing }
+                                           _ -> Nothing }
+                             _ -> Nothing }
+               _ -> Nothing,
+             case (testEquality tag) (fromSides @(Locate Or f_aAb9)) of
+               Just Refl
+                 -> case res of {
+                      Or (Pure (Molecule (VariantF tag0 res0)))
+                         (Pure (Molecule (VariantF tag1 res1)))
+                        -> case (testEquality tag0) (fromSides @(Locate Or f_aAb9)) of
+                             Just Refl
+                               -> case res0 of {
+                                    Or var_aAbi (Pure (Molecule (VariantF tag0_1 res0_1)))
+                                      -> case
+                                             (testEquality tag0_1)
+                                               (fromSides @(Locate Variable f_aAb9))
+                                         of
+                                           Just Refl
+                                             -> case res0_1 of {
+                                                  Variable var_aAbg
+                                                    -> case
+                                                           (testEquality tag1)
+                                                             (fromSides @(Locate Not f_aAb9))
+                                                       of
+                                                         Just Refl
+                                                           -> case res1 of {
+                                                                Not (Pure (Molecule (VariantF tag1_0
+                                                                                              res1_0)))
+                                                                  -> case
+                                                                         (testEquality tag1_0)
+                                                                           (fromSides
+                                                                              @(Locate Variable f_aAb9))
+                                                                     of
+                                                                       Just Refl
+                                                                         -> case res1_0 of
+                                                                              Variable var_aAbh
+                                                                                | var_aAbg
+                                                                                    == var_aAbh
+                                                                                -> Just
+                                                                                     (iLitBool
+                                                                                        True)
+                                                                              _ -> Nothing
+                                                                       _ -> Nothing }
+                                                         _ -> Nothing }
+                                           _ -> Nothing }
+                             _ -> Nothing }
+               _ -> Nothing,
+             case (testEquality tag) (fromSides @(Locate Or f_aAb9)) of
+               Just Refl
+                 -> case res of {
+                      Or (Pure (Molecule (VariantF tag0 res0)))
+                         (Pure (Molecule (VariantF tag1 res1)))
+                        -> case (testEquality tag0) (fromSides @(Locate Or f_aAb9)) of
+                             Just Refl
+                               -> case res0 of {
+                                    Or var_aAbl (Pure (Molecule (VariantF tag0_1 res0_1)))
+                                      -> case
+                                             (testEquality tag0_1)
+                                               (fromSides @(Locate Not f_aAb9))
+                                         of
+                                           Just Refl
+                                             -> case res0_1 of {
+                                                  Not (Pure (Molecule (VariantF tag0_1_0
+                                                                                res0_1_0)))
+                                                    -> case
+                                                           (testEquality tag0_1_0)
+                                                             (fromSides
+                                                                @(Locate Variable f_aAb9))
+                                                       of
+                                                         Just Refl
+                                                           -> case res0_1_0 of {
+                                                                Variable var_aAbj
+                                                                  -> case
+                                                                         (testEquality tag1)
+                                                                           (fromSides
+                                                                              @(Locate Variable f_aAb9))
+                                                                     of
+                                                                       Just Refl
+                                                                         -> case res1 of
+                                                                              Variable var_aAbk
+                                                                                | var_aAbj
+                                                                                    == var_aAbk
+                                                                                -> Just
+                                                                                     (iLitBool
+                                                                                        True)
+                                                                              _ -> Nothing
+                                                                       _ -> Nothing }
+                                                         _ -> Nothing }
+                                           _ -> Nothing }
+                             _ -> Nothing }
+               _ -> Nothing]
+      of
+        Nothing -> (pure $ Pure (Molecule node_aAbm))
+        Just so_aAbs
+          -> do (writeSTRef changed_aAbb) True
+                pure so_aAbs
+    where
+        maysum_aAbn :: [Maybe a_aAbo] -> Maybe a_aAbo
+        maysum_aAbn [] = Nothing
+        maysum_aAbn (Just v_aAbp : _) = Just v_aAbp
+        maysum_aAbn (Nothing : r_aAbq) = maysum_aAbn r_aAbq
+```
+
+Whilst Template Haskell templating may seem like an ugly hack the templated code is highly generic and the author believes that the benefits of this construction outweigh the costs. Since these rules are so generic testing can be greatly simplified. The rule writer may write tests on tiny Molecules of syntax containing only the fragments relevant to the test. Thus testing the correctness of a rule can be done in a vaccuum and verifying the correctness of a rule can be done over a universe of very simple cases.
+
+

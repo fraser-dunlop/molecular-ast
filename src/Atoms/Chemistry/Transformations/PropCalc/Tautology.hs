@@ -20,17 +20,16 @@ import Control.Monad.ST
 
 [transformation|
 -- p \/ !p = True
-tautology changed ((Not (Variable a)) `Or` (Variable b)) | a == b =
+tautology ((Not (Variable a)) `Or` (Variable b)) | a == b =
   Just (Pure (Molecule (toVariantF (LitBool True))))
 -- !p \/ p = True 
-tautology changed ((Variable a) `Or` (Not (Variable b))) | a == b =
+tautology ((Variable a) `Or` (Not (Variable b))) | a == b =
   Just (iLitBool True)
 -- (x \/ !p) \/ p = True
-tautology changed ((x `Or` (Variable a)) `Or` (Not (Variable b))) | a == b =
+tautology ((x `Or` (Variable a)) `Or` (Not (Variable b))) | a == b =
   Just (iLitBool True)
 -- (x \/ p) \/ !p = True
-tautology changed ((x `Or` (Not (Variable a))) `Or` (Variable b)) | a == b =
+tautology ((x `Or` (Not (Variable a))) `Or` (Variable b)) | a == b =
   Just (iLitBool True)
-
 |]
 

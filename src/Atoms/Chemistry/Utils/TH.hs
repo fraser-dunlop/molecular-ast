@@ -50,7 +50,7 @@ parseTransformation dsl = do
       fullats <- fullNameAtoms atoms
       tyvar <- newName "f"
       threadnm <- newName "s"
-      chname <- newName $ hardError $ extractChangedName $ head pa
+      chname <- newName "changed" 
       let context = []
           fundeps = []
           sigdecs = makeSig funname threadnm tyvar          
@@ -107,27 +107,13 @@ extractClassName (FunD nm _ ) =
       in Right $ mkName ((toUpper f):rest)
 extractClassName _ = Left "Expecting top level function definition."
 
-extractChangedName :: Dec -> Either String String 
-extractChangedName (FunD _ clauses) =
-  case join <$> (sequence (extractChangedNameC <$> clauses)) of
-    Left err -> Left err
-    Right nms ->
-      case nub (sort nms) of
-        [c] -> Right $ show c
-        _ -> Left "Expected all STRef Bool variable bindings to take the same name"
-extractChangedName _ = Left "Expected a function declaration"
-
 extractPatBodyPairs :: Dec -> Either String [(Pat,Body)]
 extractPatBodyPairs (FunD _ clauses) = join <$> (sequence (extractPatBodyPair <$> clauses))
 extractPatBodyPairs _ = Left "Expected a top level function definition."
 
 extractPatBodyPair :: Clause -> Either String [(Pat,Body)]
-extractPatBodyPair (Clause [_,pat] body []) = Right [(pat,body)]
-extractPatBodyPair _ = Left "Expecting clause of form (Var STRef Bool) (Pat Atom) = body."
-
-extractChangedNameC :: Clause -> Either String [Name]
-extractChangedNameC (Clause [VarP changed,_] _ _) = Right [changed]
-extractChangedNameC _ = Left "Expecting an STRef Bool variable binding pattern and an Atom pattern expresion"  
+extractPatBodyPair (Clause [pat] body []) = Right [(pat,body)]
+extractPatBodyPair _ = Left "Expecting clause of form Pat = Body."
 
 extractFunName :: Dec -> Either String Name
 extractFunName (FunD nm _ ) = Right nm
@@ -144,10 +130,10 @@ extractAtomsFunD (FunD _ clauses) = join <$> (sequence (extractAtomsClause <$> c
 extractAtomsFunD _ = Left "Expecting top level function definition."
 
 extractAtomsClause :: Clause -> Either String [Name]
-extractAtomsClause (Clause (changed:[pat]) body []) =
+extractAtomsClause (Clause [pat] body []) =
   Right $ extractAtomsPat pat ++ extractAtomsBody body
 extractAtomsClause (Clause [] _ [])        = Left "Expecting function to pattern match on an Atom. There is no pattern."
-extractAtomsClause (Clause (changed:(pat:_)) _ [])   = Left "Expecting a single Atom pattern in function."
+extractAtomsClause (Clause (pat:_) _ [])   = Left "Expecting a single Atom pattern in function."
 extractAtomsClause (Clause _ _ _)         = Left "This template does not support where declarations."
 
 extractAtomsPat :: Pat -> [Name]

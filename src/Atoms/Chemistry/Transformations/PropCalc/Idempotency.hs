@@ -20,27 +20,27 @@ import Control.Monad.ST
 
 [transformation|
 -- p /\ p = p 
-idempotency changed ((Variable a) `And` (Variable b)) | a == b =
+idempotency ((Variable a) `And` (Variable b)) | a == b =
   Just (iVariable a)
 -- (x /\ p) /\ p = x /\ p
-idempotency changed ((x `And` (Variable a)) `And` (Variable b)) | a == b =
+idempotency ((x `And` (Variable a)) `And` (Variable b)) | a == b =
   Just (x `iAnd` (iVariable a))
 -- p \/ p = p 
-idempotency changed ((Variable a) `Or` (Variable b)) | a == b =
+idempotency ((Variable a) `Or` (Variable b)) | a == b =
   Just (iVariable a)
 -- (x \/ p) \/ p = x \/ p
-idempotency changed ((x `Or` (Variable a)) `Or` (Variable b)) | a == b =
+idempotency ((x `Or` (Variable a)) `Or` (Variable b)) | a == b =
   Just (x `iOr` (iVariable a))
 -- !p /\ !p = !p 
-idempotency changed ((Not (Variable a)) `And` (Not (Variable b))) | a == b =
+idempotency ((Not (Variable a)) `And` (Not (Variable b))) | a == b =
   Just (iNot (iVariable a))
 -- (x /\ !p) /\ !p = x /\ !p 
-idempotency changed ((x `And` (Not (Variable a))) `And` (Not (Variable b))) | a == b =
+idempotency ((x `And` (Not (Variable a))) `And` (Not (Variable b))) | a == b =
   Just (x `iAnd` (iNot (iVariable a)))
 -- !p \/ !p = !p 
-idempotency changed ((Not (Variable a)) `Or` (Not(Variable b))) | a == b =
+idempotency ((Not (Variable a)) `Or` (Not(Variable b))) | a == b =
   Just (iNot (iVariable a))
 -- (x \/ !p) \/ !p = x \/ !p 
-idempotency changed ((x `Or` (Not (Variable a))) `Or` (Not(Variable b))) | a == b =
+idempotency ((x `Or` (Not (Variable a))) `Or` (Not(Variable b))) | a == b =
   Just (x `iOr` (iNot (iVariable a)))
 |]

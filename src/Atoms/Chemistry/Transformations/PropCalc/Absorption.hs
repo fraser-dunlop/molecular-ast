@@ -21,51 +21,51 @@ import Control.Monad.ST
 
 [transformation|
 -- p /\ (p \/ _) --> p
-absorption changed ((Variable p) `And` ((Variable p') `Or` _)) | (p == p') =
+absorption ((Variable p) `And` ((Variable p') `Or` _)) | (p == p') =
     Just (iVariable p) 
 -- p /\ (_ \/ p) --> p
-absorption changed ((Variable p) `And` (_ `Or` (Variable p'))) | p == p' =
+absorption ((Variable p) `And` (_ `Or` (Variable p'))) | p == p' =
     Just (iVariable p) 
 -- (p \/ _) /\ p --> p
-absorption changed (((Variable p') `Or` _) `And` (Variable p)) | p == p' = 
+absorption (((Variable p') `Or` _) `And` (Variable p)) | p == p' = 
     Just (iVariable p) 
 -- (_ \/ p) /\ p --> p
-absorption changed ((_ `Or` (Variable p')) `And` (Variable q)) | q == p' = 
+absorption ((_ `Or` (Variable p')) `And` (Variable q)) | q == p' = 
     Just (iVariable q) 
 -- !p /\ (!p \/ _) --> !p
-absorption changed ((Not (Variable p)) `And` ((Not (Variable p')) `Or` _)) | p == p' = 
+absorption ((Not (Variable p)) `And` ((Not (Variable p')) `Or` _)) | p == p' = 
     Just (iNot (iVariable p)) 
 -- !p /\ (_ \/ !p) --> !p
-absorption changed ((Not (Variable p)) `And` (_ `Or` (Not (Variable p')))) | p == p' = 
+absorption ((Not (Variable p)) `And` (_ `Or` (Not (Variable p')))) | p == p' = 
     Just (iNot (iVariable p)) 
 -- (!p \/ _) /\ !p --> !p
-absorption changed (((Not (Variable p')) `Or` _) `And` (Not (Variable p))) | p == p' = 
+absorption (((Not (Variable p')) `Or` _) `And` (Not (Variable p))) | p == p' = 
     Just (iNot (iVariable p)) 
 -- (_ \/ !p) /\ !p --> !p
-absorption changed ((_ `Or` (Not (Variable p'))) `And` (Not (Variable p))) | p == p' = 
+absorption ((_ `Or` (Not (Variable p'))) `And` (Not (Variable p))) | p == p' = 
     Just (iNot (iVariable p)) 
 -- p \/ (p /\ _) --> p
-absorption changed ((Variable p) `Or` ((Variable p') `And` _))  | p == p' = 
+absorption ((Variable p) `Or` ((Variable p') `And` _))  | p == p' = 
     Just (iVariable p) 
 -- p \/ (_ /\ p) --> p
-absorption changed ((Variable p) `Or` (_ `And` (Variable p'))) | p == p' = 
+absorption ((Variable p) `Or` (_ `And` (Variable p'))) | p == p' = 
     Just (iVariable p) 
 -- (p /\ _) \/ p --> p
-absorption changed (((Variable p') `And` _) `Or` (Variable p)) | p == p' = 
+absorption (((Variable p') `And` _) `Or` (Variable p)) | p == p' = 
     Just (iVariable p) 
 -- (_ /\ p) \/ p --> p
-absorption changed ((_ `And` (Variable p')) `Or` (Variable p)) | p == p' = 
+absorption ((_ `And` (Variable p')) `Or` (Variable p)) | p == p' = 
     Just (iVariable p) 
 -- !p \/ (!p /\ _) --> !p
-absorption changed ((Not (Variable p)) `Or` ((Not (Variable p')) `And` _)) | p == p' = 
+absorption ((Not (Variable p)) `Or` ((Not (Variable p')) `And` _)) | p == p' = 
     Just (iNot (iVariable p)) 
 -- !p \/ (_ /\ !p) --> !p
-absorption changed ((Not (Variable p)) `Or` (_ `And` (Not (Variable p')))) | p == p' = 
+absorption ((Not (Variable p)) `Or` (_ `And` (Not (Variable p')))) | p == p' = 
     Just (iNot (iVariable p)) 
 -- (!p /\ _) \/ !p --> !p
-absorption changed (((Not (Variable p')) `And` _) `Or` (Not (Variable p))) | p == p' = 
+absorption (((Not (Variable p')) `And` _) `Or` (Not (Variable p))) | p == p' = 
     Just (iNot (iVariable p)) 
 -- (_ /\ !p) \/ !p --> !p
-absorption changed ((_ `And` (Not (Variable p'))) `Or` (Not (Variable p))) | p == p' = 
+absorption ((_ `And` (Not (Variable p'))) `Or` (Not (Variable p))) | p == p' = 
     Just (iNot (iVariable p)) 
 |]

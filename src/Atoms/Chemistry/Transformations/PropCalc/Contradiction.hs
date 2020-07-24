@@ -20,15 +20,15 @@ import Control.Monad.ST
 
 [transformation|
 -- p /\ !p = False 
-contradiction changed ((Variable a) `And` (Not (Variable b))) | a == b =
+contradiction ((Variable a) `And` (Not (Variable b))) | a == b =
     Just (Pure (Molecule (toVariantF (LitBool False))))
 -- !p /\ p = False 
-contradiction changed ((Not (Variable a)) `And` (Variable b)) | a == b =
+contradiction ((Not (Variable a)) `And` (Variable b)) | a == b =
     Just (Pure (Molecule (toVariantF (LitBool False))))
 -- (x /\ p) /\ !p = False 
-contradiction changed ((x `And` (Variable a)) `And` (Not (Variable b))) | a == b =
+contradiction ((x `And` (Variable a)) `And` (Not (Variable b))) | a == b =
     Just (Pure (Molecule (toVariantF (LitBool False))))
 -- (x /\ !p) /\ p = False 
-contradiction changed ((x `And` (Not (Variable a))) `And` (Variable b)) | a == b =
+contradiction ((x `And` (Not (Variable a))) `And` (Variable b)) | a == b =
     Just (Pure (Molecule (toVariantF (LitBool False))))
 |]
