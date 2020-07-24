@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 86f976eeafef54cae426d0764f345c13fc7c06600879cc1bd1e43a1365d76778
+-- hash: efab45203849b30d82bfd4affafb28a0685a9a87a84eeb908d004cfcb6a03a26
 
 name:           molecular-ast
 version:        0.1.0.0
@@ -150,7 +150,7 @@ executable molecular-ast-test-exe
   hs-source-dirs:
       test
   default-extensions: ConstraintKinds DataKinds DefaultSignatures DeriveGeneric DerivingStrategies GADTs GeneralizedNewtypeDeriving LambdaCase MultiParamTypeClasses RankNTypes ScopedTypeVariables StandaloneDeriving TupleSections TypeApplications TypeOperators TypeFamilies
-  ghc-options: -Wall -Wcompat -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Wall -Wcompat -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N -O0
   build-depends:
       STMonadTrans
     , async
