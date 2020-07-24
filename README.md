@@ -102,6 +102,8 @@ class ( HasF Not t
 This is the class signature for the rule that eliminates double negation. Its class constraints permit it to operate on any AST containing the atom *Not*. The (STRef s Bool) parameter is a flag allowing the rule to say whether it changed anything and is used for applying a rule until a fixed point is reached.
 
 
+Rules being classes allows for DoubleNegation to be employed as a class constraint in the composition of rules.
+
 
 Writing the instance for this rule requires testing type equality of a node in the AST to check whether it is *Not*. This is simply lifting standard pattern matching to work with Molecular AST type level machinary. 
 ```Haskell
