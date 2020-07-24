@@ -309,6 +309,10 @@ instance (Type.Set.VariantF.HasF LitBool f_aAb9,
         maysum_aAbn (Nothing : r_aAbq) = maysum_aAbn r_aAbq
 ```
 
-Whilst Template Haskell templating may seem like an ugly hack the templated code is highly generic and the author believes that the benefits of this construction outweigh the costs. Since these rules are so generic testing can be greatly simplified. The rule writer may write tests on tiny Molecules of syntax containing only the fragments relevant to the test. Thus testing the correctness of a rule can be done in a vaccuum and verifying the correctness of a rule can be done over a universe of very simple cases.
+Whilst Template Haskell templating may seem like an ugly hack the templated code is highly generic and the author believes that the benefits of this construction outweigh the costs. Since these rules are so generic testing can be greatly simplified. The rule writer may write tests on tiny Molecules of syntax containing only the fragments relevant to the test. Thus verifying the correctness of a rule can be done in a vaccuum over a universe of very simple cases.
 
+
+# Further work and known bugs
+- The current parser implementation is very inefficient for large left recursive terms. This is fixable by employing better expression parsing by building a parser in Text.Megaparsec.Expr style.
+- Currently optimisation level is set to -O0 since anything higher causes memory exhaustion due to excessive inlining. Suspected cause is reduction rules - perhaps there is a better way of doing term elimination.
 
