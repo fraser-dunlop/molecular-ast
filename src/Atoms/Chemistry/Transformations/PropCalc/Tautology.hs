@@ -31,5 +31,23 @@ tautology ((x `Or` (Variable a)) `Or` (Not (Variable b))) | a == b =
 -- (x \/ p) \/ !p = True
 tautology ((x `Or` (Not (Variable a))) `Or` (Variable b)) | a == b =
   Just (iLitBool True)
+-- (!p \/ x) \/ p = True
+tautology (((Variable a) `Or` x) `Or` (Not (Variable b))) | a == b =
+  Just (iLitBool True)
+-- (p \/ x) \/ !p = True
+tautology (((Not (Variable a)) `Or` x) `Or` (Variable b)) | a == b =
+  Just (iLitBool True)
+-- p \/ (x \/ !p) = True
+tautology ((Not (Variable b)) `Or` (x `Or` (Variable a))) | a == b =
+  Just (iLitBool True)
+-- !p \/ (x \/ p) = True
+tautology ((Variable b) `Or` (x `Or` (Not (Variable a)))) | a == b =
+  Just (iLitBool True)
+-- p \/ (!p \/ x) = True
+tautology ((Not (Variable b)) `Or` ((Variable a) `Or` x)) | a == b =
+  Just (iLitBool True)
+-- !p \/ (p \/ x) = True
+tautology ((Variable b) `Or` ((Not (Variable a)) `Or` x)) | a == b =
+  Just (iLitBool True)
 |]
 
