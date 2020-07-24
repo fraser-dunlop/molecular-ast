@@ -34,7 +34,7 @@ class ( HasF Not t
                    -> VariantF t (Pure # Molecule (VariantF t))
                    -> ST s (Pure # Molecule (VariantF t))
 ``` 
-This is the class signature for the rule that eliminates double negation. Its class constraints permit it to operate on any AST containing the atom *Not*.
+This is the class signature for the rule that eliminates double negation. Its class constraints permit it to operate on any AST containing the atom *Not*. The (STRef s Bool) parameter is a flag allowing the rule to say whether it changed anything and is used for applying a rule until a fixed point is reached.
 
 
 
@@ -77,5 +77,5 @@ We can write an equivalent rule like so.
 doubleNegation (Not (Not a)) = a
 |]
 ```
-This Template Haskell Quasi Quoter will template a class and instance named DoubleNegation for us enabling the writing of concise and easy to read rules. [The transformation quoter supports a subset of Haskell syntax that is repurposed to form this DSL].
+This Template Haskell Quasi Quoter will template a class and instance named DoubleNegation for us enabling the writing of concise and easy to read rules. The template fills in the default case for us which is no change to the node and updates the STRef parameter in the case of match success. [The transformation quoter supports a subset of Haskell syntax including pattern guards that is repurposed to form this DSL].
 
